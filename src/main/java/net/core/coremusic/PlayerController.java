@@ -40,18 +40,7 @@ public class PlayerController {
 
     private MediaPlayer player;
 
-    private final BooleanProperty playingProperty = new SimpleBooleanProperty() {
-        @Override
-        public void set(boolean b) {
-            super.set(b);
-
-            if (b) {
-                playSvgPath.setContent(Icons.PAUSE);
-            }else {
-                playSvgPath.setContent(Icons.PLAY);
-            }
-        }
-    }, slidingProperty = new SimpleBooleanProperty();
+    private final BooleanProperty playingProperty = new SimpleBooleanProperty() , slidingProperty = new SimpleBooleanProperty();
 
     private ListView<Item> listView;
 
@@ -59,15 +48,18 @@ public class PlayerController {
     public void forward(ActionEvent event) {
         var size = listView.getItems().size();
 
-        playingProperty.set(false);
         if (size == 1) {
             player.seek(player.getMedia().getDuration());
+            playSvgPath.setContent(Icons.PLAY);
+            playingProperty.set(false);
+
             return;
         }
 
         var selectedIndex = listView.getSelectionModel().getSelectedIndex();
 
         player.stop();
+        playingProperty.set(false);
 
         if (selectedIndex < listView.getItems().size() - 1) {
             initPlayer(listView.getItems().get(selectedIndex + 1));
@@ -82,9 +74,11 @@ public class PlayerController {
     public void play(ActionEvent event) {
         if (playingProperty.get()) {
             player.pause();
+            playSvgPath.setContent(Icons.PLAY);
             playingProperty.set(false);
         }else {
             player.play();
+            playSvgPath.setContent(Icons.PAUSE);
             playingProperty.set(true);
         }
     }
@@ -95,7 +89,12 @@ public class PlayerController {
 
         if (size == 1) {
             player.seek(Duration.ZERO);
-            playingProperty.set(true);
+            if (!playingProperty.get()) {
+                player.play();
+                playingProperty.set(true);
+            }
+            playSvgPath.setContent(Icons.PAUSE);
+
             return;
         }
 
@@ -132,6 +131,7 @@ public class PlayerController {
         player = new MediaPlayer(item.media());
         player.setOnReady(() -> {
             player.play();
+            playSvgPath.setContent(Icons.PAUSE);
             playingProperty.set(true);
         });
         player.setOnEndOfMedia(() -> playingProperty.set(false));
