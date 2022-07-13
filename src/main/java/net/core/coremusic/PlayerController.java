@@ -136,7 +136,6 @@ public class PlayerController {
         });
         player.setOnEndOfMedia(() -> playingProperty.set(false));
 
-        slider.setMin(0);
         slider.setMax(item.media().getDuration().toSeconds());
         slider.valueProperty().addListener((observableValue, oldValue, newValue) -> currentTimeLabel.setText(formatDuration(item.media().getDuration(), Duration.seconds(newValue.doubleValue()))));
         totalTimeLabel.setText(formatDuration(item.media().getDuration()));
@@ -164,6 +163,7 @@ public class PlayerController {
             player.stop();
             playingProperty.set(false);
         }
+        slider.setValue(0);
     }
 
     public BooleanProperty playingProperty() {
