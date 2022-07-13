@@ -98,7 +98,6 @@ public class MusicController implements Initializable {
                         }
                     }
                 }
-                System.gc();
 
                 return null;
             }
@@ -124,6 +123,7 @@ public class MusicController implements Initializable {
             }
         };
         var thread = new Thread(task);
+        thread.setDaemon(true);
         thread.start();
     }
 
