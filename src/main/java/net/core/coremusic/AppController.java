@@ -11,6 +11,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import net.core.coremusic.utils.DirectoryWatcher;
 
 import java.io.IOException;
 import java.net.URL;

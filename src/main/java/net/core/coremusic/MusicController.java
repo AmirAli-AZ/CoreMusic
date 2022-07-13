@@ -15,6 +15,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import net.core.coremusic.model.Item;
 import net.core.coremusic.utils.AppConfigManager;
+import net.core.coremusic.utils.DirectoryWatcher;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +56,11 @@ public class MusicController implements Initializable {
         });
 
         loadMusic();
+
+        DirectoryWatcher.getInstance().addCallBack(event -> {
+            if (!refreshProperty.get())
+                loadMusic();
+        });
     }
 
     private void loadMusic() {
@@ -65,8 +71,10 @@ public class MusicController implements Initializable {
         if (!musicDir.get().exists())
             return;
 
-        refreshProperty.set(true);
-        listview.getItems().clear();
+        Platform.runLater(() -> {
+            refreshProperty.set(true);
+            listview.getItems().clear();
+        });
         var task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {

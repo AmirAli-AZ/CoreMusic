@@ -15,6 +15,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import net.core.coremusic.utils.AppConfigManager;
+import net.core.coremusic.utils.DirectoryWatcher;
 import net.core.coremusic.utils.Icons;
 
 import java.io.File;
@@ -42,6 +43,7 @@ public class App extends Application {
         var scene = new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("app-view.fxml"))));
         configManager.setTheme(configManager.loadTheme(), scene);
         stage.setScene(scene);
+        stage.setOnCloseRequest(windowEvent -> DirectoryWatcher.getInstance().interrupt());
         stage.show();
     }
 
