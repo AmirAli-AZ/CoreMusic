@@ -39,7 +39,7 @@
             </Label>
          </children>
       </HBox>
-      <HBox alignment="CENTER" spacing="3.0">
+      <HBox alignment="CENTER" spacing="8.0">
          <children>
             <Button fx:id="rewindBtn" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#rewind" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: transparent;">
                <graphic>

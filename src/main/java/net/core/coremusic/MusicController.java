@@ -1,6 +1,8 @@
 package net.core.coremusic;
 
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,6 +32,16 @@ public class MusicController implements Initializable {
 
     private PlayerController playerController;
 
+    private final BooleanProperty refreshProperty = new SimpleBooleanProperty() {
+        @Override
+        public void set(boolean b) {
+            super.set(b);
+
+            if (b && playerController != null)
+                stop();
+        }
+    };
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         listview.setCellFactory(musicCellListView -> {
@@ -53,6 +65,8 @@ public class MusicController implements Initializable {
         if (!musicDir.get().exists())
             return;
 
+        refreshProperty.set(true);
+        listview.getItems().clear();
         var task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
@@ -81,6 +95,16 @@ public class MusicController implements Initializable {
                 return null;
             }
 
+            @Override
+            protected void succeeded() {
+                refreshProperty.set(false);
+            }
+
+            @Override
+            protected void failed() {
+                refreshProperty.set(false);
+            }
+
             private boolean checkExtension(File file, String extension) {
                 if (file.isDirectory())
                     return false;
@@ -103,17 +127,26 @@ public class MusicController implements Initializable {
                 var loader = new FXMLLoader(getClass().getResource("player-view.fxml"));
                 loader.load();
                 playerController = loader.getController();
+                playerController.setListview(listview);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
         if (visible || appRoot.getBottom() == null) {
-            if (!playerController.playingProperty().get()) {
-                playerController.setItem(listview.getSelectionModel().getSelectedItem());
+            if (!playerController.playingProperty().get() && !refreshProperty.get()) {
+                playerController.initPlayer(listview.getSelectionModel().getSelectedItem());
                 appRoot.setBottom(playerController.getRoot());
             }
         }else {
+            stop();
+        }
+    }
+
+    public void stop() {
+        if (playerController != null) {
+            var appRoot = ((BorderPane) root.getScene().getRoot());
+
             playerController.stop();
             appRoot.setBottom(null);
             listview.getSelectionModel().clearSelection();
