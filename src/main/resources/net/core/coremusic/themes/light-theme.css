@@ -1,0 +1,69 @@
+#root {
+    -fx-background-color: white;
+}
+
+.item {
+    -fx-pref-height: 50px;
+    -fx-min-height: -fx-pref-height;
+    -fx-max-width: Infinity;
+    -fx-padding: 5px;
+    -fx-alignment: center;
+    -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+    -fx-text-fill: black;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.item:hover {
+    -fx-background-color: #2196F3;
+    -fx-cursor: hand;
+    -fx-text-fill: white;
+}
+
+.item:selected {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
+
+.split-pane .split-pane-divider {
+    -fx-background-color: lightgray;
+}
+
+.list-view {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-background-color: transparent;
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+}
+
+.list-cell .label {
+    -fx-text-fill: black;
+}
+
+.list-cell:filled:selected:focused, .list-cell:filled:selected {
+    -fx-background-color: #2196F3;
+}
+
+.list-cell:filled:selected:focused .label, .list-cell:filled:selected .label {
+    -fx-text-fill: white;
+}
+
+.label {
+    -fx-text-fill: black;
+}
+
+SVGPath {
+    -fx-fill: black;
+}
+
+.slider .track {
+    -fx-background-color: lightgray;
+}
+
+.slider .thumb {
+    -fx-background-color: #2196F3;
+}

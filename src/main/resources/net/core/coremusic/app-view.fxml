@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.core.coremusic.AppController">
+   <center>
+      <SplitPane id="root" fx:id="splitPane" prefHeight="500.0" prefWidth="800.0">
+         <items>
+            <VBox minWidth="100.0">
+               <children>
+                  <ToggleButton fx:id="myMusicBtn" mnemonicParsing="false" styleClass="item" text="My Music" />
+                  <ToggleButton fx:id="favouritesBtn" mnemonicParsing="false" styleClass="item" text="Favourites" />
+               </children>
+            </VBox>
+         </items>
+      </SplitPane>
+   </center>
+</BorderPane>
