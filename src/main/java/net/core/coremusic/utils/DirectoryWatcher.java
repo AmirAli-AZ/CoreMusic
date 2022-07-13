@@ -52,7 +52,6 @@ public final class DirectoryWatcher implements Runnable {
         WatchKey watchKey;
 
         do {
-
             try {
                 watchKey = service.take();
             } catch (InterruptedException e) {
