@@ -16,7 +16,7 @@ public final class DirectoryWatcher implements Runnable {
 
     private final WatchService service;
 
-    private Thread thread = new Thread(this);
+    private final Thread thread = new Thread(this);
 
     private DirectoryWatcher() throws IOException {
         service = FileSystems.getDefault().newWatchService();
@@ -84,12 +84,5 @@ public final class DirectoryWatcher implements Runnable {
 
     public List<DirectoryWatcherCallBack> getCallBacks() {
         return callBacks;
-    }
-
-    public void start() {
-        interrupt();
-
-        thread = new Thread(this);
-        thread.start();
     }
 }
