@@ -30,7 +30,7 @@ public final class Environment {
         return getAppData().getAbsolutePath();
     }
 
-    public static void hide(@NotNull Path path) throws IOException {
+    private static void hide(@NotNull Path path) throws IOException {
         var dosFileAttributeView = Files.getFileAttributeView(path, DosFileAttributeView.class);
         var dosFileAttributes = dosFileAttributeView.readAttributes();
 
