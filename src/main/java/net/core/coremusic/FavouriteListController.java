@@ -16,9 +16,9 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import net.core.coremusic.model.Item;
 import net.core.coremusic.utils.AppConfigManager;
+import net.core.coremusic.utils.DirectoryWatcher;
 import net.core.coremusic.utils.Environment;
 import net.core.coremusic.utils.FavouritesDBManager;
-import net.core.coremusic.utils.DirectoryWatcher;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class FavouriteListController implements Initializable {
                 Platform.runLater(() -> stop());
         }
     },
-    selectedProperty = new SimpleBooleanProperty();
+            selectedProperty = new SimpleBooleanProperty();
 
     private final FavouritesDBManager favouritesDBManager = FavouritesDBManager.getInstance();
 
@@ -59,7 +59,7 @@ public class FavouriteListController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        listview.setCellFactory(itemListView ->  {
+        listview.setCellFactory(itemListView -> {
             var favouriteCell = new FavouriteCell();
 
             favouriteCell.setOnMouseClicked(mouseEvent -> {
@@ -75,7 +75,7 @@ public class FavouriteListController implements Initializable {
     }
 
     public void refresh() {
-        if (isRefreshing() || !isSelected())
+        if (isRefreshing() || !isSelected() || !Files.exists(favouritesDBManager.getDbPath()))
             return;
 
         setRefreshing(true);
@@ -138,42 +138,30 @@ public class FavouriteListController implements Initializable {
     }
 
     private void watchDB() {
-        try {
-            var watcher = DirectoryWatcher.getInstance();
-            var appDataPath = Environment.getAppDataPath();
+        var watcher = DirectoryWatcher.getInstance();
+        var appDataPath = Environment.getAppDataPath();
 
-            if (Files.exists(appDataPath)) {
-                watcher.register(
-                        appDataPath,
-                        StandardWatchEventKinds.ENTRY_MODIFY,
-                        StandardWatchEventKinds.ENTRY_DELETE
-                );
+        var configManager = AppConfigManager.getInstance();
+        var musicDirPath = configManager.getMusicDirPath();
 
-                var configManager = AppConfigManager.getInstance();
-                var musicDirPath = configManager.getMusicDirPath();
+        musicDirPath.ifPresent(path -> watcher.addCallBack((event, eventDir) -> {
+            try {
+                if (Files.isSameFile(eventDir, appDataPath)) {
+                    var context = ((Path) event.context());
 
-                watcher.addCallBack((event, eventDir) -> {
-                    try {
-                        var context = ((Path) event.context());
-
-                        if (Files.isSameFile(eventDir, appDataPath)) {
-                            if (context.toString().equals("Favourites.db")) {
-                                if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY)
-                                    refresh();
-                                else
-                                    Platform.runLater(() -> listview.getItems().clear());
-                            }
-                        } else if (musicDirPath.isPresent() && Files.isSameFile(eventDir, musicDirPath.get())) {
+                    if (context.toString().equals("Favourites.db")) {
+                        if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY)
                             refresh();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        else if (event.kind() == StandardWatchEventKinds.ENTRY_DELETE)
+                            Platform.runLater(() -> listview.getItems().clear());
                     }
-                });
+                } else if (Files.isSameFile(eventDir, path)) {
+                    refresh();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
+        }));
     }
 
     public void setBorderPane(@NotNull BorderPane borderPane) {
@@ -201,7 +189,7 @@ public class FavouriteListController implements Initializable {
                 playerController.initPlayer(listview.getSelectionModel().getSelectedItem());
                 borderPane.setBottom(playerRoot);
             }
-        }else {
+        } else {
             stop();
         }
     }

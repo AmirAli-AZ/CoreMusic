@@ -16,10 +16,12 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import net.core.coremusic.utils.AppConfigManager;
 import net.core.coremusic.utils.DirectoryWatcher;
+import net.core.coremusic.utils.Environment;
 import net.core.coremusic.utils.Icons;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.StandardWatchEventKinds;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,6 +37,7 @@ public class App extends Application {
         }else {
             openApp(stage);
         }
+        registerDirectories();
     }
 
     private void openApp(Stage stage) throws IOException {
@@ -107,6 +110,33 @@ public class App extends Application {
         stage.showAndWait();
 
         return dialogExit.get();
+    }
+
+    public void registerDirectories() throws IOException {
+        var watcher = DirectoryWatcher.getInstance();
+
+        var configManager = AppConfigManager.getInstance();
+        var musicDirPath = configManager.getMusicDirPath();
+        var appDataPath = Environment.getAppDataPath();
+
+        musicDirPath.ifPresent(path -> {
+            try {
+                watcher.register(
+                        path,
+                        StandardWatchEventKinds.ENTRY_CREATE,
+                        StandardWatchEventKinds.ENTRY_MODIFY,
+                        StandardWatchEventKinds.ENTRY_DELETE
+                );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        watcher.register(
+                appDataPath,
+                StandardWatchEventKinds.ENTRY_MODIFY,
+                StandardWatchEventKinds.ENTRY_DELETE
+        );
     }
 
     public static void main(String[] args) {

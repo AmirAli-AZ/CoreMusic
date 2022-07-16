@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.StandardWatchEventKinds;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -176,31 +175,18 @@ public class MusicController implements Initializable {
     }
 
     private void watchMusics() {
-        try {
-            var watcher = DirectoryWatcher.getInstance();
-            var configManager = AppConfigManager.getInstance();
-            var musicDirPath = configManager.getMusicDirPath();
+        var watcher = DirectoryWatcher.getInstance();
+        var configManager = AppConfigManager.getInstance();
+        var musicDirPath = configManager.getMusicDirPath();
 
-            if (musicDirPath.isPresent()) {
-                watcher.register(
-                        musicDirPath.get(),
-                        StandardWatchEventKinds.ENTRY_CREATE,
-                        StandardWatchEventKinds.ENTRY_DELETE,
-                        StandardWatchEventKinds.ENTRY_MODIFY
-                );
-
-                watcher.addCallBack((event, eventDir) -> {
-                    try {
-                        if (Files.isSameFile(eventDir, musicDirPath.get()))
-                            refresh();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+        musicDirPath.ifPresent(path -> watcher.addCallBack((event, eventDir) -> {
+            try {
+                if (Files.isSameFile(eventDir, path))
+                    refresh();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
+        }));
     }
 
     public void setSelected(boolean selected) {
