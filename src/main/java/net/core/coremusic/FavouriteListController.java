@@ -46,8 +46,7 @@ public class FavouriteListController implements Initializable {
             if (b && playerController != null)
                 Platform.runLater(() -> stop());
         }
-    },
-            selectedProperty = new SimpleBooleanProperty();
+    },selectedProperty = new SimpleBooleanProperty();
 
     private final FavouritesDBManager favouritesDBManager = FavouritesDBManager.getInstance();
 

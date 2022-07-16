@@ -153,7 +153,6 @@ public class PlayerController implements Initializable {
 
         if (Files.exists(appDataPath)) {
             watcher.addCallBack((event, eventDir) -> {
-                System.out.println(eventDir);
                 try {
                     if (Files.isSameFile(eventDir, appDataPath)) {
                         var context = ((Path) event.context());

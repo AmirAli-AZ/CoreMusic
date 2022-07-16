@@ -72,6 +72,7 @@ public class MusicController implements Initializable {
 
         var configManager = AppConfigManager.getInstance();
         var musicDir = configManager.getMusicDir();
+
         if (musicDir.isEmpty())
             return;
         if (!musicDir.get().exists())
