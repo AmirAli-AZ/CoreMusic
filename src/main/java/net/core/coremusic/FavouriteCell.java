@@ -10,7 +10,7 @@ import net.core.coremusic.model.Item;
 
 import java.io.IOException;
 
-public class MusicCell extends ListCell<Item> {
+public class FavouriteCell extends ListCell<Item> {
 
     @FXML
     private HBox root;
@@ -31,7 +31,7 @@ public class MusicCell extends ListCell<Item> {
             setGraphic(null);
         }else {
             if (loader == null) {
-                loader = new FXMLLoader(getClass().getResource("music-cell-view.fxml"));
+                loader = new FXMLLoader(getClass().getResource("favourite-cell-view.fxml"));
                 loader.setController(this);
                 try {
                     loader.load();

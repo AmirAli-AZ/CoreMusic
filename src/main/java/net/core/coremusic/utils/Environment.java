@@ -26,8 +26,8 @@ public final class Environment {
         return file;
     }
 
-    public static String getAppDataPath() {
-        return getAppData().getAbsolutePath();
+    public static Path getAppDataPath() {
+        return getAppData().toPath();
     }
 
     private static void hide(@NotNull Path path) throws IOException {

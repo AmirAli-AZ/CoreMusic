@@ -11,11 +11,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import net.core.coremusic.utils.DirectoryWatcher;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class AppController implements Initializable {
@@ -31,7 +29,11 @@ public class AppController implements Initializable {
 
     private final ToggleGroup toggleGroup = new ToggleGroup();
 
-    private VBox myMusicRoot;
+    private MusicController musicController;
+
+    private FavouriteListController favouriteListController;
+
+    private VBox musicRoot, favouriteListRoot;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -46,6 +48,8 @@ public class AppController implements Initializable {
             if (currentToggle != null) {
                 if (currentToggle == myMusicBtn)
                     loadMyMusic();
+                else if (currentToggle == favouritesBtn)
+                    loadFavourites();
             }else {
                 splitPane.getItems().set(splitPane.getItems().size() - 1, emptyPage);
             }
@@ -54,16 +58,56 @@ public class AppController implements Initializable {
 
     private void loadMyMusic() {
         try {
-            if (myMusicRoot == null) {
-                myMusicRoot = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("music-view.fxml")));
+            if (musicController == null) {
+                var loader = new FXMLLoader(getClass().getResource("music-view.fxml"));
+                musicRoot = loader.load();
+                musicController = loader.getController();
+
+                musicController.setBorderPane(root);
                 splitPane.setDividerPositions(0.2168);
             }
             if (splitPane.getItems().size() == 1)
-                splitPane.getItems().add(myMusicRoot);
+                splitPane.getItems().add(musicRoot);
             else
-                splitPane.getItems().set(splitPane.getItems().size() - 1, myMusicRoot);
+                splitPane.getItems().set(splitPane.getItems().size() - 1, musicRoot);
+
             if (!myMusicBtn.isSelected())
                 myMusicBtn.setSelected(true);
+
+            musicController.setSelected(true);
+            musicController.refresh();
+
+            if (favouriteListController != null) {
+                favouriteListController.stop();
+                favouriteListController.setSelected(false);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadFavourites() {
+        try {
+            if (favouriteListController == null) {
+                var loader = new FXMLLoader(getClass().getResource("favourite-list-view.fxml"));
+                favouriteListRoot = loader.load();
+                favouriteListController = loader.getController();
+
+                favouriteListController.setBorderPane(root);
+                splitPane.setDividerPositions(0.2168);
+            }
+            if (splitPane.getItems().size() == 1)
+                splitPane.getItems().add(favouriteListRoot);
+            else
+                splitPane.getItems().set(splitPane.getItems().size() - 1, favouriteListRoot);
+
+            favouriteListController.setSelected(true);
+            favouriteListController.refresh();
+
+            if (musicController != null) {
+                musicController.stop();
+                musicController.setSelected(false);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

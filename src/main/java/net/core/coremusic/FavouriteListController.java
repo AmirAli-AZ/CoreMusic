@@ -16,26 +16,27 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import net.core.coremusic.model.Item;
 import net.core.coremusic.utils.AppConfigManager;
+import net.core.coremusic.utils.Environment;
+import net.core.coremusic.utils.FavouritesDBManager;
 import net.core.coremusic.utils.DirectoryWatcher;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
-public class MusicController implements Initializable {
+public class FavouriteListController implements Initializable {
 
     @FXML
     private VBox root;
 
     @FXML
     private ListView<Item> listview;
-
-    private PlayerController playerController;
 
     private final BooleanProperty refreshProperty = new SimpleBooleanProperty() {
         @Override
@@ -45,37 +46,36 @@ public class MusicController implements Initializable {
             if (b && playerController != null)
                 Platform.runLater(() -> stop());
         }
-    }, selectedProperty = new SimpleBooleanProperty();
+    },
+    selectedProperty = new SimpleBooleanProperty();
+
+    private final FavouritesDBManager favouritesDBManager = FavouritesDBManager.getInstance();
 
     private BorderPane borderPane;
+
+    private PlayerController playerController;
 
     private VBox playerRoot;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        listview.setCellFactory(musicCellListView -> {
-            var musicCell = new MusicCell();
-            musicCell.setOnMouseClicked(mouseEvent -> {
-                if (!musicCell.isEmpty())
+        listview.setCellFactory(itemListView ->  {
+            var favouriteCell = new FavouriteCell();
+
+            favouriteCell.setOnMouseClicked(mouseEvent -> {
+                if (!favouriteCell.isEmpty())
                     setPlayerVisible(mouseEvent.getButton() == MouseButton.PRIMARY);
             });
 
-            return musicCell;
+            return favouriteCell;
         });
 
         refresh();
-        watchMusics();
+        watchDB();
     }
 
     public void refresh() {
         if (isRefreshing() || !isSelected())
-            return;
-
-        var configManager = AppConfigManager.getInstance();
-        var musicDir = configManager.getMusicDir();
-        if (musicDir.isEmpty())
-            return;
-        if (!musicDir.get().exists())
             return;
 
         setRefreshing(true);
@@ -86,25 +86,35 @@ public class MusicController implements Initializable {
             protected Void call() throws Exception {
                 var object = new Object();
 
-                for (File file : Objects.requireNonNull(musicDir.get().listFiles())) {
-                    if (checkExtension(file, ".mp3") || checkExtension(file, ".wav")) {
-                        var media = new Media(file.toURI().toString());
-                        var mediaPlayer = new MediaPlayer(media);
+                var statement = favouritesDBManager.getConnection().createStatement();
 
-                        mediaPlayer.setOnReady(() -> {
-                            var image = Objects.requireNonNullElseGet(((Image) media.getMetadata().get("image")), () -> new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/music-icon.png"))));
-                            var musicTitle = Objects.requireNonNullElseGet(((String) media.getMetadata().get("title")), () -> new File(media.getSource()).getName());
+                var result = statement.executeQuery("select * from favourites;");
 
-                            Platform.runLater(() -> listview.getItems().add(new Item(musicTitle, image, file.toPath())));
+                while (result.next()) {
+                    var path = Paths.get(result.getString("path"));
+                    if (!Files.exists(path)) {
+                        favouritesDBManager.removeFromFavourites(path);
+                        continue;
+                    }
 
-                            synchronized (object) {
-                                object.notify();
-                            }
-                        });
+                    var title = result.getString("title");
+
+                    var media = new Media(path.toUri().toString());
+                    var player = new MediaPlayer(media);
+
+                    player.setOnReady(() -> {
+                        var image = Objects.requireNonNullElseGet(((Image) media.getMetadata().get("image")), () -> new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/music-icon.png"))));
+                        var item = new Item(title, image, path);
+
+                        Platform.runLater(() -> listview.getItems().add(item));
 
                         synchronized (object) {
-                            object.wait();
+                            object.notify();
                         }
+                    });
+
+                    synchronized (object) {
+                        object.wait();
                     }
                 }
 
@@ -120,20 +130,54 @@ public class MusicController implements Initializable {
             protected void failed() {
                 setRefreshing(false);
             }
-
-            private boolean checkExtension(File file, String extension) {
-                if (file.isDirectory())
-                    return false;
-                var filename = file.getName();
-                var lastIndex = filename.lastIndexOf('.');
-                if (lastIndex == -1)
-                    return false;
-                return filename.substring(lastIndex).equalsIgnoreCase(extension);
-            }
         };
+
         var thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
+    }
+
+    private void watchDB() {
+        try {
+            var watcher = DirectoryWatcher.getInstance();
+            var appDataPath = Environment.getAppDataPath();
+
+            if (Files.exists(appDataPath)) {
+                watcher.register(
+                        appDataPath,
+                        StandardWatchEventKinds.ENTRY_MODIFY,
+                        StandardWatchEventKinds.ENTRY_DELETE
+                );
+
+                var configManager = AppConfigManager.getInstance();
+                var musicDirPath = configManager.getMusicDirPath();
+
+                watcher.addCallBack((event, eventDir) -> {
+                    try {
+                        var context = ((Path) event.context());
+
+                        if (Files.isSameFile(eventDir, appDataPath)) {
+                            if (context.toString().equals("Favourites.db")) {
+                                if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY)
+                                    refresh();
+                                else
+                                    Platform.runLater(() -> listview.getItems().clear());
+                            }
+                        } else if (musicDirPath.isPresent() && Files.isSameFile(eventDir, musicDirPath.get())) {
+                            refresh();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setBorderPane(@NotNull BorderPane borderPane) {
+        this.borderPane = borderPane;
     }
 
     public void setPlayerVisible(boolean visible) {
@@ -162,10 +206,6 @@ public class MusicController implements Initializable {
         }
     }
 
-    public void setBorderPane(@NotNull BorderPane borderPane) {
-        this.borderPane = borderPane;
-    }
-
     public void stop() {
         if (playerController == null || borderPane == null)
             return;
@@ -173,34 +213,6 @@ public class MusicController implements Initializable {
         if (isSelected())
             borderPane.setBottom(null);
         listview.getSelectionModel().clearSelection();
-    }
-
-    private void watchMusics() {
-        try {
-            var watcher = DirectoryWatcher.getInstance();
-            var configManager = AppConfigManager.getInstance();
-            var musicDirPath = configManager.getMusicDirPath();
-
-            if (musicDirPath.isPresent()) {
-                watcher.register(
-                        musicDirPath.get(),
-                        StandardWatchEventKinds.ENTRY_CREATE,
-                        StandardWatchEventKinds.ENTRY_DELETE,
-                        StandardWatchEventKinds.ENTRY_MODIFY
-                );
-
-                watcher.addCallBack((event, eventDir) -> {
-                    try {
-                        if (Files.isSameFile(eventDir, musicDirPath.get()))
-                            refresh();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public void setSelected(boolean selected) {

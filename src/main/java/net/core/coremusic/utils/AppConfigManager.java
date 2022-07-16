@@ -4,6 +4,7 @@ import javafx.scene.Scene;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -79,7 +80,7 @@ public final class AppConfigManager {
         return Optional.empty();
     }
 
-    public Optional<String> getMusicDirPath() {
-        return getMusicDir().map(File::getAbsolutePath);
+    public Optional<Path> getMusicDirPath() {
+        return getMusicDir().map(File::toPath);
     }
 }

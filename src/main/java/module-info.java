@@ -3,6 +3,7 @@ module net.core.coremusic {
     requires javafx.fxml;
     requires javafx.media;
     requires org.jetbrains.annotations;
+    requires java.sql;
 
     opens net.core.coremusic to javafx.fxml;
     exports net.core.coremusic;

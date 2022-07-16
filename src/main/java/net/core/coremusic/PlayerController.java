@@ -4,17 +4,18 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 import net.core.coremusic.model.Item;
+import net.core.coremusic.utils.FavouritesDBManager;
 import net.core.coremusic.utils.Icons;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,10 +28,10 @@ public class PlayerController {
     private VBox root;
 
     @FXML
-    private Button rewindBtn, playBtn, forwardBtn;
+    private Button rewindBtn, playBtn, forwardBtn, favouriteBtn;
 
     @FXML
-    private SVGPath rewindSvgPath, playSvgPath, forwardSvgPath;
+    private SVGPath rewindSvgPath, playSvgPath, forwardSvgPath, favouriteSvgPath;
 
     @FXML
     private Label currentTimeLabel, totalTimeLabel;
@@ -44,8 +45,17 @@ public class PlayerController {
 
     private ListView<Item> listView;
 
+    private final FavouritesDBManager favouriteDBManager = FavouritesDBManager.getInstance();
+
+    private Item item;
+
+    private Object rootController;
+
     @FXML
     public void forward(ActionEvent event) {
+        if (listView == null)
+            return;
+
         var size = listView.getItems().size();
 
         if (size == 1) {
@@ -85,6 +95,9 @@ public class PlayerController {
 
     @FXML
     public void rewind(ActionEvent event) {
+        if (listView == null)
+            return;
+
         var size = listView.getItems().size();
 
         if (size == 1) {
@@ -123,26 +136,52 @@ public class PlayerController {
         slidingProperty.set(false);
     }
 
-    public Parent getRoot() {
-        return root;
+    @FXML
+    public void addToFavourites() {
+        if (item == null)
+            return;
+
+        if (rootController instanceof FavouriteListController controller) {
+            controller.setRefreshing(true);
+            favouriteDBManager.removeFromFavourites(item);
+            favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
+            listView.getItems().remove(item);
+            controller.setRefreshing(false);
+        }else if (rootController instanceof MusicController) {
+            if (favouriteDBManager.isAdded(item)) {
+                favouriteDBManager.removeFromFavourites(item);
+                favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
+            } else {
+                favouriteDBManager.addToFavourites(item.title(), item.path());
+                favouriteSvgPath.setContent(Icons.FAVOURITE);
+            }
+        }
     }
 
     public void initPlayer(@NotNull Item item) {
-        player = new MediaPlayer(item.media());
+        this.item = item;
+
+        var media = new Media(item.path().toUri().toString());
+        player = new MediaPlayer(media);
         player.setOnReady(() -> {
+            slider.setMax(media.getDuration().toSeconds());
+            totalTimeLabel.setText(formatDuration(media.getDuration()));
             player.play();
             playSvgPath.setContent(Icons.PAUSE);
             playingProperty.set(true);
         });
         player.setOnEndOfMedia(() -> playingProperty.set(false));
 
-        slider.setMax(item.media().getDuration().toSeconds());
-        slider.valueProperty().addListener((observableValue, oldValue, newValue) -> currentTimeLabel.setText(formatDuration(item.media().getDuration(), Duration.seconds(newValue.doubleValue()))));
-        totalTimeLabel.setText(formatDuration(item.media().getDuration()));
+        slider.valueProperty().addListener((observableValue, oldValue, newValue) -> currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue()))));
         player.currentTimeProperty().addListener((observableValue, duration, currentDuration) -> {
             if (!slidingProperty.get())
                 slider.setValue(currentDuration.toSeconds());
         });
+
+        if (favouriteDBManager.isAdded(item))
+            favouriteSvgPath.setContent(Icons.FAVOURITE);
+        else
+            favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
     }
 
     private String formatDuration(@NotNull Duration duration, @NotNull Duration currentDuration) {
@@ -166,11 +205,15 @@ public class PlayerController {
         slider.setValue(0);
     }
 
-    public BooleanProperty playingProperty() {
-        return playingProperty;
+    public boolean isPlaying() {
+        return !playingProperty.get();
     }
 
     public void setListview(@NotNull ListView<Item> listview) {
         this.listView = listview;
+    }
+
+    public void setRootController(@NotNull Object rootController) {
+        this.rootController = rootController;
     }
 }

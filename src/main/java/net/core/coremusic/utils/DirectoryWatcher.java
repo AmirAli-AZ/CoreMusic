@@ -5,8 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Map;
 
 public final class DirectoryWatcher implements Runnable {
 
@@ -18,20 +19,10 @@ public final class DirectoryWatcher implements Runnable {
 
     private final Thread thread = new Thread(this);
 
+    private final Map<WatchKey, Path> keyMap = new HashMap<>();
+
     private DirectoryWatcher() throws IOException {
         service = FileSystems.getDefault().newWatchService();
-
-        var configManager = AppConfigManager.getInstance();
-        if (configManager.getMusicDir().isEmpty())
-            throw new NoSuchElementException("music dir path cannot be empty");
-
-        configManager.getMusicDir().get().toPath().register(
-                service,
-                StandardWatchEventKinds.ENTRY_CREATE,
-                StandardWatchEventKinds.ENTRY_DELETE,
-                StandardWatchEventKinds.ENTRY_MODIFY
-        );
-
         thread.start();
     }
 
@@ -60,9 +51,11 @@ public final class DirectoryWatcher implements Runnable {
             }
 
             if (!callBacks.isEmpty()) {
+                var eventDir = keyMap.get(watchKey);
+
                 for (WatchEvent<?> event : watchKey.pollEvents()) {
                     for (DirectoryWatcherCallBack callBack : callBacks)
-                        callBack.onResult(event);
+                        callBack.onResult(event, eventDir);
                 }
             }
 
@@ -84,5 +77,13 @@ public final class DirectoryWatcher implements Runnable {
 
     public List<DirectoryWatcherCallBack> getCallBacks() {
         return callBacks;
+    }
+
+    public WatchService getService() {
+        return service;
+    }
+
+    public void register(@NotNull Path path, WatchEvent.Kind<?>... events) throws IOException {
+        keyMap.put(path.register(service, events), path);
     }
 }
