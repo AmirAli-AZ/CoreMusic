@@ -184,7 +184,7 @@ public class FavouriteListController implements Initializable {
         }
 
         if (visible || borderPane.getBottom() == null) {
-            if (playerController.isPlaying() && !isRefreshing()) {
+            if (!playerController.isPlaying() && !isRefreshing()) {
                 playerController.initPlayer(listview.getSelectionModel().getSelectedItem());
                 borderPane.setBottom(playerRoot);
             }

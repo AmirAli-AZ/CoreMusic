@@ -38,10 +38,10 @@ public class PlayerController implements Initializable {
     private VBox root;
 
     @FXML
-    private Button rewindBtn, playBtn, forwardBtn, favouriteBtn;
+    private Button rewindBtn, playBtn, forwardBtn, favouriteBtn, repeatBtn;
 
     @FXML
-    private SVGPath rewindSvgPath, playSvgPath, forwardSvgPath, favouriteSvgPath;
+    private SVGPath rewindSvgPath, playSvgPath, forwardSvgPath, favouriteSvgPath, repeatSvgPath;
 
     @FXML
     private Label currentTimeLabel, totalTimeLabel;
@@ -51,7 +51,10 @@ public class PlayerController implements Initializable {
 
     private MediaPlayer player;
 
-    private final BooleanProperty playingProperty = new SimpleBooleanProperty() , slidingProperty = new SimpleBooleanProperty();
+    private final BooleanProperty
+            playingProperty = new SimpleBooleanProperty(),
+            slidingProperty = new SimpleBooleanProperty(),
+            repeatProperty = new SimpleBooleanProperty();
 
     private ListView<Item> listView;
 
@@ -60,6 +63,11 @@ public class PlayerController implements Initializable {
     private Item item;
 
     private Object rootController;
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        watchDB();
+    }
 
     @FXML
     public void forward(ActionEvent event) {
@@ -71,7 +79,7 @@ public class PlayerController implements Initializable {
         if (size == 1) {
             player.seek(player.getMedia().getDuration());
             playSvgPath.setContent(Icons.PLAY);
-            playingProperty.set(false);
+            setPlaying(false);
 
             return;
         }
@@ -79,7 +87,7 @@ public class PlayerController implements Initializable {
         var selectedIndex = listView.getSelectionModel().getSelectedIndex();
 
         player.stop();
-        playingProperty.set(false);
+        setPlaying(false);
 
         if (selectedIndex < listView.getItems().size() - 1) {
             initPlayer(listView.getItems().get(selectedIndex + 1));
@@ -98,11 +106,11 @@ public class PlayerController implements Initializable {
         if (playingProperty.get()) {
             player.pause();
             playSvgPath.setContent(Icons.PLAY);
-            playingProperty.set(false);
+            setPlaying(false);
         }else {
             player.play();
             playSvgPath.setContent(Icons.PAUSE);
-            playingProperty.set(true);
+            setPlaying(true);
         }
     }
 
@@ -117,7 +125,7 @@ public class PlayerController implements Initializable {
             player.seek(Duration.ZERO);
             if (!playingProperty.get()) {
                 player.play();
-                playingProperty.set(true);
+                setPlaying(true);
             }
             playSvgPath.setContent(Icons.PAUSE);
 
@@ -127,7 +135,7 @@ public class PlayerController implements Initializable {
         var selectedIndex = listView.getSelectionModel().getSelectedIndex();
 
         player.stop();
-        playingProperty.set(false);
+        setPlaying(false);
 
         if (selectedIndex > 0) {
             initPlayer(listView.getItems().get(selectedIndex - 1));
@@ -143,7 +151,7 @@ public class PlayerController implements Initializable {
         if (player == null)
             return;
 
-        slidingProperty.set(true);
+        setSliding(true);
     }
 
     @FXML
@@ -152,32 +160,7 @@ public class PlayerController implements Initializable {
             return;
 
         player.seek(Duration.seconds(slider.getValue()));
-        slidingProperty.set(false);
-    }
-
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        var watcher = DirectoryWatcher.getInstance();
-        var appDataPath = Environment.getAppDataPath();
-
-        if (Files.exists(appDataPath)) {
-            watcher.addCallBack((event, eventDir) -> {
-                try {
-                    if (Files.isSameFile(eventDir, appDataPath)) {
-                        var context = ((Path) event.context());
-
-                        if (context.toString().equals("Favourites.db") && event.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
-                            Platform.runLater(() -> {
-                                favouriteBtn.setDisable(true);
-                                favouriteBtn.setGraphic(null);
-                            });
-                        }
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        }
+        setSliding(false);
     }
 
     @FXML
@@ -202,6 +185,17 @@ public class PlayerController implements Initializable {
         }
     }
 
+    @FXML
+    public void repeat(ActionEvent actionEvent) {
+        if (isRepeat()) {
+            setRepeat(false);
+            repeatSvgPath.setContent(Icons.REPEAT_OFF);
+        }else {
+            setRepeat(true);
+            repeatSvgPath.setContent(Icons.REPEAT_ON);
+        }
+    }
+
     public void initPlayer(@NotNull Item item) {
         this.item = item;
 
@@ -212,13 +206,18 @@ public class PlayerController implements Initializable {
             totalTimeLabel.setText(formatDuration(media.getDuration()));
             player.play();
             playSvgPath.setContent(Icons.PAUSE);
-            playingProperty.set(true);
+            setPlaying(true);
         });
-        player.setOnEndOfMedia(() -> playingProperty.set(false));
+        player.setOnEndOfMedia(() -> {
+            if (isRepeat())
+                player.seek(Duration.ZERO);
+            else
+                setPlaying(false);
+        });
 
         slider.valueProperty().addListener((observableValue, oldValue, newValue) -> currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue()))));
         player.currentTimeProperty().addListener((observableValue, duration, currentDuration) -> {
-            if (!slidingProperty.get())
+            if (!isSliding())
                 slider.setValue(currentDuration.toSeconds());
         });
 
@@ -245,15 +244,57 @@ public class PlayerController implements Initializable {
         if (player == null)
             return;
 
-        if (playingProperty.get()) {
+        if (isPlaying()) {
             player.stop();
-            playingProperty.set(false);
+            setPlaying(false);
         }
         slider.setValue(0);
     }
 
+    public void watchDB() {
+        var watcher = DirectoryWatcher.getInstance();
+        var appDataPath = Environment.getAppDataPath();
+
+        watcher.addCallBack((event, eventDir) -> {
+            try {
+                if (Files.isSameFile(eventDir, appDataPath)) {
+                    var context = ((Path) event.context());
+
+                    if (context.toString().equals("Favourites.db") && event.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
+                        Platform.runLater(() -> {
+                            favouriteBtn.setGraphic(null);
+                            favouriteBtn.setManaged(false);
+                        });
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void setPlaying(boolean playing) {
+        playingProperty.set(playing);
+    }
+
     public boolean isPlaying() {
-        return !playingProperty.get();
+        return playingProperty.get();
+    }
+
+    public void setSliding(boolean sliding) {
+        slidingProperty.set(sliding);
+    }
+
+    public boolean isSliding() {
+        return slidingProperty.get();
+    }
+
+    public void setRepeat(boolean repeat) {
+        repeatProperty.set(repeat);
+    }
+
+    public boolean isRepeat() {
+        return repeatProperty.get();
     }
 
     public void setListview(@NotNull ListView<Item> listview) {
