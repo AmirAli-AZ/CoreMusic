@@ -209,10 +209,12 @@ public class PlayerController implements Initializable {
             setPlaying(true);
         });
         player.setOnEndOfMedia(() -> {
-            if (isRepeat())
+            if (isRepeat()) {
                 player.seek(Duration.ZERO);
-            else
+            }else {
                 setPlaying(false);
+                playSvgPath.setContent(Icons.PLAY);
+            }
         });
 
         slider.valueProperty().addListener((observableValue, oldValue, newValue) -> currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue()))));
