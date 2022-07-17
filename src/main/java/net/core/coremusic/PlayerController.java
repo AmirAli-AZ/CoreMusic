@@ -63,7 +63,7 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void forward(ActionEvent event) {
-        if (listView == null)
+        if (listView == null || player == null)
             return;
 
         var size = listView.getItems().size();
@@ -92,6 +92,9 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void play(ActionEvent event) {
+        if (player == null)
+            return;
+
         if (playingProperty.get()) {
             player.pause();
             playSvgPath.setContent(Icons.PLAY);
@@ -105,7 +108,7 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void rewind(ActionEvent event) {
-        if (listView == null)
+        if (listView == null || player == null)
             return;
 
         var size = listView.getItems().size();
@@ -137,11 +140,17 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void sliderPressed(MouseEvent event) {
+        if (player == null)
+            return;
+
         slidingProperty.set(true);
     }
 
     @FXML
     public void sliderReleased(MouseEvent event) {
+        if (player == null)
+            return;
+
         player.seek(Duration.seconds(slider.getValue()));
         slidingProperty.set(false);
     }
@@ -179,8 +188,8 @@ public class PlayerController implements Initializable {
         if (rootController instanceof FavouriteListController controller) {
             controller.setRefreshing(true);
             favouriteDBManager.removeFromFavourites(item);
-            favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
             listView.getItems().remove(item);
+            favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
             controller.setRefreshing(false);
         }else if (rootController instanceof MusicController) {
             if (favouriteDBManager.isAdded(item)) {
@@ -233,6 +242,9 @@ public class PlayerController implements Initializable {
     }
 
     public void stop() {
+        if (player == null)
+            return;
+
         if (playingProperty.get()) {
             player.stop();
             playingProperty.set(false);
