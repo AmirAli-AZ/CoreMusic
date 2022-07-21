@@ -1,6 +1,7 @@
 package net.core.coremusic;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -19,6 +20,7 @@ import net.core.coremusic.utils.DirectoryWatcher;
 import net.core.coremusic.utils.Environment;
 import net.core.coremusic.utils.Icons;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.StandardWatchEventKinds;
@@ -28,26 +30,31 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class App extends Application {
 
+    private Stage stage;
+
     @Override
     public void start(Stage stage) throws Exception {
+        this.stage = stage;
+
         var configManager = AppConfigManager.getInstance();
         if (configManager.getMusicDir().isEmpty()) {
             if (askMusicFolder())
-                openApp(stage);
-        }else {
-            openApp(stage);
+                openApp();
+        } else {
+            openApp();
         }
-        registerDirectories();
     }
 
-    private void openApp(Stage stage) throws IOException {
+    private void openApp() throws IOException, AWTException {
         var configManager = AppConfigManager.getInstance();
         stage.setTitle("CoreMusic");
         var scene = new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("app-view.fxml"))));
         configManager.setTheme(configManager.loadTheme(), scene);
         stage.setScene(scene);
-        stage.setOnCloseRequest(windowEvent -> DirectoryWatcher.getInstance().interrupt());
         stage.show();
+
+        registerDirectories();
+        createTrayIcon();
     }
 
     public static boolean askMusicFolder() {
@@ -137,6 +144,32 @@ public class App extends Application {
                 StandardWatchEventKinds.ENTRY_MODIFY,
                 StandardWatchEventKinds.ENTRY_DELETE
         );
+    }
+
+    private void createTrayIcon() throws AWTException {
+        if (SystemTray.isSupported()) {
+            Platform.setImplicitExit(false);
+
+            var popupMenu = new PopupMenu();
+            var exitItem = new MenuItem("Exit Application");
+            exitItem.addActionListener(e -> {
+                DirectoryWatcher.getInstance().interrupt();
+                Platform.exit();
+                System.exit(0);
+            });
+            var openItem = new MenuItem("Open CoreMusic");
+            openItem.addActionListener(e -> Platform.runLater(() -> {
+                if (!stage.isShowing())
+                    stage.show();
+            }));
+            popupMenu.add(openItem);
+            popupMenu.addSeparator();
+            popupMenu.add(exitItem);
+
+            var trayIcon = new TrayIcon(Toolkit.getDefaultToolkit().createImage(getClass().getResource("icons/music-icon.png")), "CoreMusic", popupMenu);
+            trayIcon.setImageAutoSize(true);
+            SystemTray.getSystemTray().add(trayIcon);
+        }
     }
 
     public static void main(String[] args) {
