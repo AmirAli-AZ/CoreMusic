@@ -32,11 +32,12 @@ public class App extends Application {
 
     private Stage stage;
 
+    private static final AppConfigManager configManager = AppConfigManager.getInstance();
+
     @Override
     public void start(Stage stage) throws Exception {
         this.stage = stage;
 
-        var configManager = AppConfigManager.getInstance();
         if (configManager.getMusicDir().isEmpty()) {
             if (askMusicFolder())
                 openApp();
@@ -49,6 +50,7 @@ public class App extends Application {
         var configManager = AppConfigManager.getInstance();
         stage.setTitle("CoreMusic");
         var scene = new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("app-view.fxml"))));
+        configManager.addThemeChangedListener(theme -> configManager.setTheme(theme, scene));
         configManager.setTheme(configManager.loadTheme(), scene);
         stage.setScene(scene);
         stage.show();
@@ -65,7 +67,6 @@ public class App extends Application {
         var okBtn = new Button("OK");
         var dialogExit = new AtomicBoolean(false);
         var musicDir = new AtomicReference<File>();
-        var configManager = AppConfigManager.getInstance();
 
         stage.setResizable(false);
         HBox.setHgrow(pathLabel, Priority.ALWAYS);
@@ -122,7 +123,6 @@ public class App extends Application {
     public void registerDirectories() throws IOException {
         var watcher = DirectoryWatcher.getInstance();
 
-        var configManager = AppConfigManager.getInstance();
         var musicDirPath = configManager.getMusicDirPath();
         var appDataPath = Environment.getAppDataPath();
 

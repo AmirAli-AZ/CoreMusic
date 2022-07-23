@@ -8,6 +8,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -18,6 +20,8 @@ public final class AppConfigManager {
     private final File configFile = new File(Environment.getAppDataPath() + File.separator + "config.properties");
 
     private final Properties properties = new Properties();
+
+    private final List<ThemeChangedListener> listeners = new ArrayList<>();
 
     private AppConfigManager() {
         refresh();
@@ -50,8 +54,14 @@ public final class AppConfigManager {
         try {
             saveTheme(theme);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
+    }
+
+    public void setThemeAndCallListeners(@NotNull Themes theme, @NotNull Scene scene) {
+        setTheme(theme, scene);
+        for (ThemeChangedListener listener : listeners)
+            listener.onChanged(theme);
     }
 
     public Themes loadTheme() {
@@ -85,5 +95,13 @@ public final class AppConfigManager {
 
     public Optional<Path> getMusicDirPath() {
         return getMusicDir().map(File::toPath);
+    }
+
+    public void addThemeChangedListener(@NotNull ThemeChangedListener listener) {
+        listeners.add(listener);
+    }
+
+    public List<ThemeChangedListener> getThemeChangedListeners() {
+        return listeners;
     }
 }

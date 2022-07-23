@@ -102,6 +102,12 @@ public class PlayerController implements Initializable {
     public void play(ActionEvent event) {
         if (player == null)
             return;
+        if (player.getCurrentTime().equals(player.getTotalDuration())) {
+            player.seek(Duration.ZERO);
+            setPlaying(true);
+            playSvgPath.setContent(Icons.PAUSE);
+            return;
+        }
 
         if (playingProperty.get()) {
             player.pause();
@@ -159,7 +165,8 @@ public class PlayerController implements Initializable {
         if (player == null)
             return;
 
-        player.seek(Duration.seconds(slider.getValue()));
+        var duration = Duration.seconds(slider.getValue());
+        player.seek(duration);
         setSliding(false);
     }
 
@@ -257,7 +264,7 @@ public class PlayerController implements Initializable {
         var watcher = DirectoryWatcher.getInstance();
         var appDataPath = Environment.getAppDataPath();
 
-        watcher.addCallBack((event, eventDir) -> {
+        watcher.addListener((event, eventDir) -> {
             try {
                 if (Files.isSameFile(eventDir, appDataPath)) {
                     var context = ((Path) event.context());

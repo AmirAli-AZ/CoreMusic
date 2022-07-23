@@ -13,7 +13,7 @@ public final class DirectoryWatcher implements Runnable {
 
     private static DirectoryWatcher instance;
 
-    private final List<DirectoryWatcherCallBack> callBacks = new ArrayList<>();
+    private final List<DirectoryWatcherListener> listeners = new ArrayList<>();
 
     private final WatchService service;
 
@@ -50,12 +50,12 @@ public final class DirectoryWatcher implements Runnable {
                 break;
             }
 
-            if (!callBacks.isEmpty()) {
+            if (!listeners.isEmpty()) {
                 var eventDir = keyMap.get(watchKey);
 
                 for (WatchEvent<?> event : watchKey.pollEvents()) {
-                    for (DirectoryWatcherCallBack callBack : callBacks)
-                        callBack.onResult(event, eventDir);
+                    for (DirectoryWatcherListener listener : listeners)
+                        listener.onResult(event, eventDir);
                 }
             }
 
@@ -71,12 +71,12 @@ public final class DirectoryWatcher implements Runnable {
         return thread.isInterrupted();
     }
 
-    public void addCallBack(@NotNull DirectoryWatcherCallBack callBack) {
-        callBacks.add(callBack);
+    public void addListener(@NotNull DirectoryWatcherListener listener) {
+        listeners.add(listener);
     }
 
-    public List<DirectoryWatcherCallBack> getCallBacks() {
-        return callBacks;
+    public List<DirectoryWatcherListener> getListeners() {
+        return listeners;
     }
 
     public WatchService getService() {
