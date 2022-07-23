@@ -58,7 +58,7 @@ public class SettingsController implements Initializable {
             var comboBox = new ComboBox<>(FXCollections.observableArrayList(Themes.values()));
             var currentTheme = configManager.loadTheme();
             comboBox.getSelectionModel().select(currentTheme);
-            comboBox.valueProperty().addListener((observableValue, previousTheme, newTheme) -> configManager.setThemeAndCallListeners(newTheme, splitPane.getScene()));
+            comboBox.valueProperty().addListener((observableValue, previousTheme, newTheme) -> configManager.applyThemeToAllWindows(newTheme));
             var hbox = new HBox(3, label, comboBox);
             hbox.setAlignment(Pos.CENTER_LEFT);
 

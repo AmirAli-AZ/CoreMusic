@@ -50,7 +50,6 @@ public class App extends Application {
         var configManager = AppConfigManager.getInstance();
         stage.setTitle("CoreMusic");
         var scene = new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("app-view.fxml"))));
-        configManager.addThemeChangedListener(theme -> configManager.setTheme(theme, scene));
         configManager.setTheme(configManager.loadTheme(), scene);
         stage.setScene(scene);
         stage.show();

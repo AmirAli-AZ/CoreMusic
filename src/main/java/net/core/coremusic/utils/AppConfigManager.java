@@ -1,6 +1,8 @@
 package net.core.coremusic.utils;
 
 import javafx.scene.Scene;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -8,8 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -20,8 +20,6 @@ public final class AppConfigManager {
     private final File configFile = new File(Environment.getAppDataPath() + File.separator + "config.properties");
 
     private final Properties properties = new Properties();
-
-    private final List<ThemeChangedListener> listeners = new ArrayList<>();
 
     private AppConfigManager() {
         refresh();
@@ -58,10 +56,23 @@ public final class AppConfigManager {
         }
     }
 
-    public void setThemeAndCallListeners(@NotNull Themes theme, @NotNull Scene scene) {
-        setTheme(theme, scene);
-        for (ThemeChangedListener listener : listeners)
-            listener.onChanged(theme);
+    public void applyThemeToAllWindows(@NotNull Themes theme) {
+        for (Window window : Window.getWindows()) {
+            if (window instanceof Stage stage) {
+                var scene = stage.getScene();
+
+                if (scene.getStylesheets().isEmpty())
+                    scene.getStylesheets().add(theme.getPath());
+                else
+                    scene.getStylesheets().set(0, theme.getPath());
+            }
+        }
+
+        try {
+            saveTheme(theme);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public Themes loadTheme() {
@@ -95,13 +106,5 @@ public final class AppConfigManager {
 
     public Optional<Path> getMusicDirPath() {
         return getMusicDir().map(File::toPath);
-    }
-
-    public void addThemeChangedListener(@NotNull ThemeChangedListener listener) {
-        listeners.add(listener);
-    }
-
-    public List<ThemeChangedListener> getThemeChangedListeners() {
-        return listeners;
     }
 }
