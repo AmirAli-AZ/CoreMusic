@@ -166,6 +166,10 @@ public class PlayerController implements Initializable {
             return;
 
         var duration = Duration.seconds(slider.getValue());
+        if (player.getCurrentTime().equals(player.getTotalDuration()) && !duration.equals(player.getTotalDuration())) {
+            playSvgPath.setContent(Icons.PAUSE);
+            setPlaying(true);
+        }
         player.seek(duration);
         setSliding(false);
     }
