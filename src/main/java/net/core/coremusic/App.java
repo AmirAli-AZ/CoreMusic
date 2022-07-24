@@ -55,7 +55,10 @@ public class App extends Application {
         stage.show();
 
         registerDirectories();
-        createTrayIcon();
+        var success = createTrayIcon();
+
+        if (!success)
+            stage.setOnCloseRequest(windowEvent -> DirectoryWatcher.getInstance().interrupt());
     }
 
     public static boolean askMusicFolder() {
@@ -145,30 +148,33 @@ public class App extends Application {
         );
     }
 
-    private void createTrayIcon() throws AWTException {
-        if (SystemTray.isSupported()) {
-            Platform.setImplicitExit(false);
+    private boolean createTrayIcon() throws AWTException {
+        if (!SystemTray.isSupported())
+            return false;
 
-            var popupMenu = new PopupMenu();
-            var exitItem = new MenuItem("Exit Application");
-            exitItem.addActionListener(e -> {
-                DirectoryWatcher.getInstance().interrupt();
-                Platform.exit();
-                System.exit(0);
-            });
-            var openItem = new MenuItem("Open CoreMusic");
-            openItem.addActionListener(e -> Platform.runLater(() -> {
-                if (!stage.isShowing())
-                    stage.show();
-            }));
-            popupMenu.add(openItem);
-            popupMenu.addSeparator();
-            popupMenu.add(exitItem);
+        Platform.setImplicitExit(false);
 
-            var trayIcon = new TrayIcon(Toolkit.getDefaultToolkit().createImage(getClass().getResource("icons/music-icon.png")), "CoreMusic", popupMenu);
-            trayIcon.setImageAutoSize(true);
-            SystemTray.getSystemTray().add(trayIcon);
-        }
+        var popupMenu = new PopupMenu();
+        var exitItem = new MenuItem("Exit Application");
+        exitItem.addActionListener(e -> {
+            DirectoryWatcher.getInstance().interrupt();
+            Platform.exit();
+            System.exit(0);
+        });
+        var openItem = new MenuItem("Open CoreMusic");
+        openItem.addActionListener(e -> Platform.runLater(() -> {
+            if (!stage.isShowing())
+                stage.show();
+        }));
+        popupMenu.add(openItem);
+        popupMenu.addSeparator();
+        popupMenu.add(exitItem);
+
+        var trayIcon = new TrayIcon(Toolkit.getDefaultToolkit().createImage(getClass().getResource("icons/music-icon.png")), "CoreMusic", popupMenu);
+        trayIcon.setImageAutoSize(true);
+        SystemTray.getSystemTray().add(trayIcon);
+
+        return true;
     }
 
     public static void main(String[] args) {
