@@ -5,7 +5,6 @@ module net.core.coremusic {
     requires org.jetbrains.annotations;
     requires java.sql;
     requires java.desktop;
-    requires javafx.swing;
 
     opens net.core.coremusic to javafx.fxml;
     exports net.core.coremusic;
