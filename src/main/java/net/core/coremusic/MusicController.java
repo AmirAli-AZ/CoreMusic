@@ -41,7 +41,7 @@ public class MusicController implements Initializable {
         public void set(boolean b) {
             super.set(b);
 
-            if (b && playerController != null)
+            if (b)
                 Platform.runLater(() -> stop());
         }
     }, selectedProperty = new SimpleBooleanProperty();
