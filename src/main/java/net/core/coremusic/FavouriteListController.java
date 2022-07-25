@@ -98,7 +98,7 @@ public class FavouriteListController implements Initializable {
 
                 while (result.next()) {
                     var path = Paths.get(result.getString("path"));
-                    if (!Files.exists(path)) {
+                    if (Files.notExists(path)) {
                         favouritesDBManager.removeFromFavourites(path);
                         continue;
                     }
