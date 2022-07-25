@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -70,12 +71,18 @@ public class FavouriteListController implements Initializable {
         });
 
         refresh();
-        watchDB();
+        watchDirs();
     }
 
     public void refresh() {
-        if (isRefreshing() || !isSelected() || !Files.exists(favouritesDBManager.getDbPath()))
+        if (isRefreshing() || !isSelected())
             return;
+
+        try {
+            favouritesDBManager.init();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         setRefreshing(true);
         Platform.runLater(() -> listview.getItems().clear());
@@ -136,31 +143,30 @@ public class FavouriteListController implements Initializable {
         thread.start();
     }
 
-    private void watchDB() {
+    private void watchDirs() {
         var watcher = DirectoryWatcher.getInstance();
         var appDataPath = Environment.getAppDataPath();
-
         var configManager = AppConfigManager.getInstance();
         var musicDirPath = configManager.getMusicDirPath();
 
-        musicDirPath.ifPresent(path -> watcher.addListener((event, eventDir) -> {
+        watcher.addListener((event, eventDir) -> {
             try {
                 if (Files.isSameFile(eventDir, appDataPath)) {
                     var context = ((Path) event.context());
 
-                    if (context.toString().equals("Favourites.db")) {
+                    if (context.toString().equals(favouritesDBManager.getDbPath().getFileName().toString())) {
                         if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY)
                             refresh();
                         else if (event.kind() == StandardWatchEventKinds.ENTRY_DELETE)
                             Platform.runLater(() -> listview.getItems().clear());
                     }
-                } else if (Files.isSameFile(eventDir, path)) {
+                } else if (musicDirPath.isPresent() && Files.isSameFile(eventDir, musicDirPath.get())) {
                     refresh();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }));
+        });
     }
 
     public void setBorderPane(@NotNull BorderPane borderPane) {

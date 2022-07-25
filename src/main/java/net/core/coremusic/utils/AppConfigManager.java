@@ -9,7 +9,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -17,12 +19,12 @@ public final class AppConfigManager {
 
     private static AppConfigManager instance;
 
-    private final File configFile = new File(Environment.getAppDataPath() + File.separator + "config.properties");
+    private final Path configPath = Paths.get(Environment.getAppDataPath() + File.separator + "config.properties");
 
     private final Properties properties = new Properties();
 
     private AppConfigManager() {
-        refresh();
+        load();
     }
 
     public static AppConfigManager getInstance() {
@@ -31,15 +33,15 @@ public final class AppConfigManager {
         return instance;
     }
 
-    public void refresh() {
-        if (configFile.exists()) {
-            try {
-                var inputStream = new FileInputStream(configFile);
-                properties.load(inputStream);
-                inputStream.close();
-            }catch (IOException e) {
-                e.printStackTrace();
-            }
+    public void load() {
+        if (!Files.exists(configPath))
+            return;
+        try {
+            var inputStream = new FileInputStream(configPath.toFile());
+            properties.load(inputStream);
+            inputStream.close();
+        }catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -81,20 +83,20 @@ public final class AppConfigManager {
 
     private void saveTheme(@NotNull Themes theme) throws IOException {
         properties.setProperty("theme", theme.getName());
-        var outputStream = new FileOutputStream(configFile);
+        var outputStream = new FileOutputStream(configPath.toFile());
         properties.store(outputStream, "DO NOT EDIT");
         outputStream.close();
     }
 
     public void setMusicDir(@NotNull File file) throws IOException {
         properties.setProperty("music_dir", file.getAbsolutePath());
-        var outputStream = new FileOutputStream(configFile);
+        var outputStream = new FileOutputStream(configPath.toFile());
         properties.store(outputStream, "DO NOT EDIT");
         outputStream.close();
     }
 
-    public void setMusicDir(@NotNull String path) throws IOException {
-        setMusicDir(new File(path));
+    public void setMusicDir(@NotNull Path path) throws IOException {
+        setMusicDir(path.toFile());
     }
 
     public Optional<File> getMusicDir() {
@@ -106,5 +108,9 @@ public final class AppConfigManager {
 
     public Optional<Path> getMusicDirPath() {
         return getMusicDir().map(File::toPath);
+    }
+
+    public Path getConfigPath() {
+        return configPath;
     }
 }

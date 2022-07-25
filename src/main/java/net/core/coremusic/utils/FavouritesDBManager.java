@@ -16,16 +16,12 @@ public final class FavouritesDBManager {
 
     private static FavouritesDBManager instance;
 
-    private final Connection connection;
+    private Connection connection;
 
     private final Path dbPath = Paths.get(Environment.getAppDataPath() + File.separator + "Favourites.db");
 
     private FavouritesDBManager() throws SQLException {
-        connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
-
-        var statement = connection.createStatement();
-        statement.execute("create table if not exists favourites (title text not null, path text unique not null);");
-        statement.close();
+        init();
     }
 
     public static FavouritesDBManager getInstance() {
@@ -38,6 +34,14 @@ public final class FavouritesDBManager {
         }
 
         return instance;
+    }
+
+    public void init() throws SQLException {
+        connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+
+        var statement = connection.createStatement();
+        statement.execute("create table if not exists favourites (title text not null, path text unique not null);");
+        statement.close();
     }
 
     public void addToFavourites(@NotNull String title, @NotNull Path path) {

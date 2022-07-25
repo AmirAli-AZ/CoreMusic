@@ -4,12 +4,12 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.VBox?>
 
-
-<SplitPane fx:id="splitPane" id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.core.coremusic.SettingsController">
+<SplitPane id="root" fx:id="splitPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.core.coremusic.SettingsController">
    <items>
       <VBox prefHeight="200.0" prefWidth="100.0">
          <children>
             <ToggleButton fx:id="themesBtn" mnemonicParsing="false" styleClass="item" text="Themes" />
+            <ToggleButton fx:id="musicDirBtn" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" styleClass="item" text="Music Directory" />
          </children>
       </VBox>
    </items>

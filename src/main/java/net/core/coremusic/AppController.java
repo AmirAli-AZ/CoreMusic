@@ -138,6 +138,11 @@ public class AppController implements Initializable {
             splitPane.getItems().add(emptyPage);
         else
             splitPane.getItems().set(splitPane.getItems().size() - 1, emptyPage);
+
+        if (musicController != null)
+            musicController.setSelected(false);
+        if (favouriteListController != null)
+            favouriteListController.setSelected(false);
     }
 
     @FXML
@@ -151,8 +156,11 @@ public class AppController implements Initializable {
     private Stage createSettingsStage() throws IOException {
         var stage = new Stage();
         stage.setTitle("Settings");
-        var scene = new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("settings-view.fxml"))));
+        var loader = new FXMLLoader(getClass().getResource("settings-view.fxml"));
+        var scene = new Scene(loader.load());
         AppConfigManager.getInstance().setTheme(AppConfigManager.getInstance().loadTheme(), scene);
+        SettingsController controller = loader.getController();
+        controller.setMusicController(musicController);
         stage.setScene(scene);
         Platform.runLater(() -> stage.initOwner(root.getScene().getWindow()));
 

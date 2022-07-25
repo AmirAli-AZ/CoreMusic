@@ -6,24 +6,30 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.DosFileAttributeView;
 
 public final class Environment {
 
-    public static File getAppData() {
+    private static Path path;
+
+    static {
         var path = System.getProperty("user.home") + File.separator + ".net.core.coremusic";
 
         if (OS.isWindows())
             path = System.getenv("APPDATA") + File.separator + ".net.core.coremusic";
-        var file = new File(path);
+        Environment.path = Paths.get(path);
+    }
+
+    public static File getAppData() {
         try {
-            var dir = Files.createDirectories(file.toPath());
+            var dir = Files.createDirectories(path);
             hide(dir);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return file;
+        return path.toFile();
     }
 
     public static Path getAppDataPath() {

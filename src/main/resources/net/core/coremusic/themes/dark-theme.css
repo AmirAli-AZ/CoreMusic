@@ -86,7 +86,7 @@ SVGPath {
     -fx-cursor: hand;
 }
 
-.menu-item:hover {
+.menu-item:focused {
     -fx-background-color: -fx-accent;
 }
 

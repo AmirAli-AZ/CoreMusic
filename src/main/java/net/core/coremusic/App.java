@@ -28,11 +28,21 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class App extends Application {
+public final class App extends Application {
+
+    private static App app;
 
     private Stage stage;
 
-    private static final AppConfigManager configManager = AppConfigManager.getInstance();
+    private final AppConfigManager configManager = AppConfigManager.getInstance();
+
+    public App() {
+        app = this;
+    }
+
+    public static App getInstance() {
+        return app;
+    }
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -61,7 +71,7 @@ public class App extends Application {
             stage.setOnCloseRequest(windowEvent -> DirectoryWatcher.getInstance().interrupt());
     }
 
-    public static boolean askMusicFolder() {
+    public boolean askMusicFolder() {
         var stage = new Stage();
         var pathLabel = new Label();
         var pickBtn = new Button();

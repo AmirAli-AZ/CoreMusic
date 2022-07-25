@@ -1,11 +1,9 @@
 package net.core.coremusic;
 
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -17,22 +15,15 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 import net.core.coremusic.model.Item;
-import net.core.coremusic.utils.DirectoryWatcher;
-import net.core.coremusic.utils.Environment;
 import net.core.coremusic.utils.FavouritesDBManager;
 import net.core.coremusic.utils.Icons;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardWatchEventKinds;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.ResourceBundle;
 
-public class PlayerController implements Initializable {
+public class PlayerController {
 
     @FXML
     private VBox root;
@@ -64,10 +55,6 @@ public class PlayerController implements Initializable {
 
     private Object rootController;
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        watchDB();
-    }
 
     @FXML
     public void forward(ActionEvent event) {
@@ -179,6 +166,11 @@ public class PlayerController implements Initializable {
         if (item == null)
             return;
 
+        try {
+            favouriteDBManager.init();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         if (rootController instanceof FavouriteListController controller) {
             controller.setRefreshing(true);
             favouriteDBManager.removeFromFavourites(item);
@@ -234,6 +226,11 @@ public class PlayerController implements Initializable {
                 slider.setValue(currentDuration.toSeconds());
         });
 
+        try {
+            favouriteDBManager.init();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         if (favouriteDBManager.isAdded(item))
             favouriteSvgPath.setContent(Icons.FAVOURITE);
         else
@@ -262,28 +259,6 @@ public class PlayerController implements Initializable {
             setPlaying(false);
         }
         slider.setValue(0);
-    }
-
-    public void watchDB() {
-        var watcher = DirectoryWatcher.getInstance();
-        var appDataPath = Environment.getAppDataPath();
-
-        watcher.addListener((event, eventDir) -> {
-            try {
-                if (Files.isSameFile(eventDir, appDataPath)) {
-                    var context = ((Path) event.context());
-
-                    if (context.toString().equals("Favourites.db") && event.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
-                        Platform.runLater(() -> {
-                            favouriteBtn.setGraphic(null);
-                            favouriteBtn.setManaged(false);
-                        });
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
     }
 
     public void setPlaying(boolean playing) {

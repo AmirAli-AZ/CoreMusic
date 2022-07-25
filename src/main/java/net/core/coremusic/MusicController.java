@@ -63,7 +63,7 @@ public class MusicController implements Initializable {
         });
 
         refresh();
-        watchMusics();
+        watchDirs();
     }
 
     public void refresh() {
@@ -175,19 +175,19 @@ public class MusicController implements Initializable {
         listview.getSelectionModel().clearSelection();
     }
 
-    private void watchMusics() {
+    private void watchDirs() {
         var watcher = DirectoryWatcher.getInstance();
         var configManager = AppConfigManager.getInstance();
         var musicDirPath = configManager.getMusicDirPath();
 
-        musicDirPath.ifPresent(path -> watcher.addListener((event, eventDir) -> {
+        watcher.addListener((event, eventDir) -> {
             try {
-                if (Files.isSameFile(eventDir, path))
+                if (musicDirPath.isPresent() && Files.isSameFile(musicDirPath.get(), eventDir))
                     refresh();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }));
+        });
     }
 
     public void setSelected(boolean selected) {
