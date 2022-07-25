@@ -34,7 +34,7 @@ public final class AppConfigManager {
     }
 
     public void load() {
-        if (!Files.exists(configPath))
+        if (Files.notExists(configPath))
             return;
         try {
             var inputStream = new FileInputStream(configPath.toFile());

@@ -45,7 +45,7 @@ public final class FavouritesDBManager {
     }
 
     public void addToFavourites(@NotNull String title, @NotNull Path path) {
-        if (!Files.exists(dbPath))
+        if (Files.notExists(dbPath))
             return;
 
         Item addedFavouriteItem = null;
@@ -63,7 +63,7 @@ public final class FavouritesDBManager {
     }
 
     public void removeFromFavourites(@NotNull Item item) {
-        if (!Files.exists(dbPath))
+        if (Files.notExists(dbPath))
             return;
 
         try {
@@ -78,7 +78,7 @@ public final class FavouritesDBManager {
     }
 
     public void removeFromFavourites(@NotNull Path path) {
-        if (!Files.exists(dbPath))
+        if (Files.notExists(dbPath))
             return;
 
         try {
@@ -93,7 +93,7 @@ public final class FavouritesDBManager {
     }
 
     public boolean isAdded(@NotNull Item item) {
-        if (!Files.exists(dbPath))
+        if (Files.notExists(dbPath))
             return false;
 
         try {
