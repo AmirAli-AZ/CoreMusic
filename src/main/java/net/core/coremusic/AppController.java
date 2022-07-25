@@ -20,7 +20,6 @@ import net.core.coremusic.utils.AppConfigManager;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class AppController implements Initializable {
