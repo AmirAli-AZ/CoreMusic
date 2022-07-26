@@ -92,7 +92,7 @@ public class MusicController implements Initializable {
                         var mediaPlayer = new MediaPlayer(media);
 
                         mediaPlayer.setOnReady(() -> {
-                            var image = Objects.requireNonNullElseGet(((Image) media.getMetadata().get("image")), () -> new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/music-icon.png"))));
+                            var image = Objects.requireNonNullElseGet(((Image) media.getMetadata().get("image")), () -> new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/CoreMusicLogo64.png"))));
                             var musicTitle = Objects.requireNonNullElseGet(((String) media.getMetadata().get("title")), () -> new File(media.getSource()).getName());
 
                             Platform.runLater(() -> listview.getItems().add(new Item(musicTitle, image, file.toPath())));

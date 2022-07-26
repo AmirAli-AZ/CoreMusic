@@ -109,7 +109,7 @@ public class FavouriteListController implements Initializable {
                     var player = new MediaPlayer(media);
 
                     player.setOnReady(() -> {
-                        var image = Objects.requireNonNullElseGet(((Image) media.getMetadata().get("image")), () -> new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/music-icon.png"))));
+                        var image = Objects.requireNonNullElseGet(((Image) media.getMetadata().get("image")), () -> new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/CoreMusicLogo64.png"))));
                         var item = new Item(title, image, path);
 
                         Platform.runLater(() -> listview.getItems().add(item));

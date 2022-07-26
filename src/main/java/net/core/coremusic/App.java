@@ -2,6 +2,7 @@ package net.core.coremusic;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -9,12 +10,14 @@ import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import net.core.coremusic.utils.AppConfigManager;
 import net.core.coremusic.utils.DirectoryWatcher;
 import net.core.coremusic.utils.Environment;
@@ -48,6 +51,7 @@ public final class App extends Application {
     public void start(Stage stage) throws Exception {
         this.stage = stage;
 
+        syncWindowIcons();
         if (configManager.getMusicDir().isEmpty()) {
             if (askMusicFolder())
                 openApp();
@@ -110,7 +114,7 @@ public final class App extends Application {
             }
         });
 
-        var center = new HBox(3, new Label("Music Dir: "), pathLabel, pickBtn);
+        var center = new HBox(3, new Label("Music Directory: "), pathLabel, pickBtn);
         center.setAlignment(Pos.TOP_LEFT);
         center.setPadding(new Insets(5));
 
@@ -180,11 +184,24 @@ public final class App extends Application {
         popupMenu.addSeparator();
         popupMenu.add(exitItem);
 
-        var trayIcon = new TrayIcon(Toolkit.getDefaultToolkit().createImage(getClass().getResource("icons/music-icon.png")), "CoreMusic", popupMenu);
+        var trayIcon = new TrayIcon(Toolkit.getDefaultToolkit().createImage(getClass().getResource("icons/CoreMusicLogo64.png")), "CoreMusic", popupMenu);
         trayIcon.setImageAutoSize(true);
         SystemTray.getSystemTray().add(trayIcon);
 
         return true;
+    }
+
+    public void syncWindowIcons() {
+        Window.getWindows().addListener((ListChangeListener<? super Window>) change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    for (Window window : change.getAddedSubList()) {
+                        if (window instanceof Stage stage)
+                            stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/CoreMusicLogo64.png"))));
+                    }
+                }
+            }
+        });
     }
 
     public static void main(String[] args) {
