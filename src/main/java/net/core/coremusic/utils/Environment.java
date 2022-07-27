@@ -24,7 +24,8 @@ public final class Environment {
     public static File getAppData() {
         try {
             var dir = Files.createDirectories(path);
-            hide(dir);
+            if (OS.isWindows())
+                setHideAttribute(dir);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -36,7 +37,7 @@ public final class Environment {
         return getAppData().toPath();
     }
 
-    private static void hide(@NotNull Path path) throws IOException {
+    private static void setHideAttribute(@NotNull Path path) throws IOException {
         var dosFileAttributeView = Files.getFileAttributeView(path, DosFileAttributeView.class);
         var dosFileAttributes = dosFileAttributeView.readAttributes();
 
