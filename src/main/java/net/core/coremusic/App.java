@@ -61,7 +61,6 @@ public final class App extends Application {
     }
 
     private void openApp() throws IOException, AWTException {
-        var configManager = AppConfigManager.getInstance();
         stage.setTitle("CoreMusic");
         var scene = new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getResource("app-view.fxml"))));
         configManager.setTheme(configManager.loadTheme(), scene);

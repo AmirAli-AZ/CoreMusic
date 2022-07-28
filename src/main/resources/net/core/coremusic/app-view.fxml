@@ -7,10 +7,10 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.input.KeyCodeCombination?>
 <BorderPane fx:id="root" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.core.coremusic.AppController">
    <center>
       <SplitPane id="root" fx:id="splitPane" prefHeight="500.0" prefWidth="800.0">
