@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.effect.DropShadow?>
@@ -15,12 +16,16 @@
    <center>
       <SplitPane id="root" fx:id="splitPane" prefHeight="500.0" prefWidth="800.0">
          <items>
-            <VBox minWidth="100.0">
-               <children>
-                  <ToggleButton fx:id="musicBtn" mnemonicParsing="false" styleClass="item" text="My Music" />
-                  <ToggleButton fx:id="favouritesBtn" mnemonicParsing="false" styleClass="item" text="Favourites" />
-               </children>
-            </VBox>
+            <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER">
+               <content>
+                  <VBox>
+                     <children>
+                        <ToggleButton fx:id="musicBtn" mnemonicParsing="false" styleClass="item" text="My Music" />
+                        <ToggleButton fx:id="favouritesBtn" mnemonicParsing="false" styleClass="item" text="Favourites" />
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
          </items>
       </SplitPane>
    </center>
