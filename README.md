@@ -1,3 +1,3 @@
 ## CoreMusic
 
-_In progress..._
+In progress...
