@@ -83,39 +83,12 @@ public class PlayerController implements Initializable {
         });
     }
 
-    @FXML
-    public void forward(ActionEvent event) {
-        if (listView == null || player == null)
-            return;
-
-        var size = listView.getItems().size();
-
-        if (size == 1) {
-            player.seek(player.getMedia().getDuration());
-            playSvgPath.setContent(Icons.PLAY);
-            setPlaying(false);
-
-            return;
-        }
-
-        var selectedIndex = listView.getSelectionModel().getSelectedIndex();
-
-        player.stop();
-        setPlaying(false);
-
-        if (selectedIndex < listView.getItems().size() - 1) {
-            initPlayer(listView.getItems().get(selectedIndex + 1));
-            listView.getSelectionModel().select(selectedIndex + 1);
-        }else {
-            initPlayer(listView.getItems().get(0));
-            listView.getSelectionModel().select(0);
-        }
-    }
 
     @FXML
     public void play(ActionEvent event) {
         if (player == null)
             return;
+
         if (player.getCurrentTime().equals(player.getTotalDuration())) {
             player.seek(Duration.ZERO);
             setPlaying(true);
@@ -137,6 +110,8 @@ public class PlayerController implements Initializable {
     @FXML
     public void rewind(ActionEvent event) {
         if (listView == null || player == null)
+            return;
+        if (listView.getItems().isEmpty())
             return;
 
         var size = listView.getItems().size();
@@ -163,6 +138,37 @@ public class PlayerController implements Initializable {
         }else {
             initPlayer(listView.getItems().get(size - 1));
             listView.getSelectionModel().select(size - 1);
+        }
+    }
+
+    @FXML
+    public void forward(ActionEvent event) {
+        if (listView == null || player == null)
+            return;
+        if (listView.getItems().isEmpty())
+            return;
+
+        var size = listView.getItems().size();
+
+        if (size == 1) {
+            player.seek(player.getMedia().getDuration());
+            playSvgPath.setContent(Icons.PLAY);
+            setPlaying(false);
+
+            return;
+        }
+
+        var selectedIndex = listView.getSelectionModel().getSelectedIndex();
+
+        player.stop();
+        setPlaying(false);
+
+        if (selectedIndex < listView.getItems().size() - 1) {
+            initPlayer(listView.getItems().get(selectedIndex + 1));
+            listView.getSelectionModel().select(selectedIndex + 1);
+        }else {
+            initPlayer(listView.getItems().get(0));
+            listView.getSelectionModel().select(0);
         }
     }
 
