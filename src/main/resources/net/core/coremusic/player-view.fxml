@@ -10,7 +10,7 @@
 <?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="root" prefHeight="120.0" prefWidth="600.0" spacing="5.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.core.coremusic.PlayerController">
+<VBox fx:id="root" prefHeight="120.0" prefWidth="600.0" spacing="5.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.core.coremusic.PlayerController">
    <children>
       <Slider fx:id="slider" onMousePressed="#sliderPressed" onMouseReleased="#sliderReleased">
          <cursor>
