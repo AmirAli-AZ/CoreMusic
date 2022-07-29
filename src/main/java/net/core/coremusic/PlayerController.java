@@ -4,6 +4,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -19,28 +20,32 @@ import net.core.coremusic.utils.FavouritesDBManager;
 import net.core.coremusic.utils.Icons;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.ResourceBundle;
 
-public class PlayerController {
+public class PlayerController implements Initializable {
 
     @FXML
     private VBox root;
 
     @FXML
-    private Button rewindBtn, playBtn, forwardBtn, favouriteBtn, repeatBtn;
+    private Button rewindBtn, playBtn, forwardBtn, favouriteBtn, repeatBtn, volumeBtn;
 
     @FXML
-    private SVGPath rewindSvgPath, playSvgPath, forwardSvgPath, favouriteSvgPath, repeatSvgPath;
+    private SVGPath rewindSvgPath, playSvgPath, forwardSvgPath, favouriteSvgPath, repeatSvgPath, volumeSvgPath;
 
     @FXML
     private Label currentTimeLabel, totalTimeLabel;
 
     @FXML
-    private Slider slider;
+    private Slider slider, volumeSlider;
 
     private MediaPlayer player;
+
+    private Media media;
 
     private final BooleanProperty
             playingProperty = new SimpleBooleanProperty(),
@@ -55,6 +60,28 @@ public class PlayerController {
 
     private Object rootController;
 
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        slider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (media != null)
+                currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue())));
+        });
+
+        volumeSlider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (player != null) {
+                var doubleValue = newValue.doubleValue();
+
+                player.setVolume(doubleValue * 0.01);
+
+                if (doubleValue == 0)
+                    volumeSvgPath.setContent(Icons.VOLUME_OFF);
+                else if (doubleValue <= 50)
+                    volumeSvgPath.setContent(Icons.VOLUME_DOWN);
+                else
+                    volumeSvgPath.setContent(Icons.VOLUME_UP);
+            }
+        });
+    }
 
     @FXML
     public void forward(ActionEvent event) {
@@ -199,16 +226,29 @@ public class PlayerController {
         }
     }
 
+    @FXML
+    public void volumeBtnAction(ActionEvent actionEvent) {
+        var volumeSliderValue = volumeSlider.getValue();
+
+        if (volumeSliderValue == 0)
+            volumeSlider.setValue(volumeSlider.getMax() / 2);
+        else if (volumeSliderValue <= 50)
+            volumeSlider.setValue(volumeSlider.getMax());
+        else
+            volumeSlider.setValue(volumeSlider.getMin());
+    }
+
     public void initPlayer(@NotNull Item item) {
         this.item = item;
 
-        var media = new Media(item.path().toUri().toString());
+        media = new Media(item.path().toUri().toString());
         player = new MediaPlayer(media);
         player.setOnReady(() -> {
             slider.setMax(media.getDuration().toSeconds());
             totalTimeLabel.setText(formatDuration(media.getDuration()));
             player.play();
             playSvgPath.setContent(Icons.PAUSE);
+            player.setVolume(volumeSlider.getValue() * 0.01);
             setPlaying(true);
         });
         player.setOnEndOfMedia(() -> {
@@ -220,7 +260,6 @@ public class PlayerController {
             }
         });
 
-        slider.valueProperty().addListener((observableValue, oldValue, newValue) -> currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue()))));
         player.currentTimeProperty().addListener((observableValue, duration, currentDuration) -> {
             if (!isSliding())
                 slider.setValue(currentDuration.toSeconds());

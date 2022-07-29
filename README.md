@@ -6,6 +6,6 @@ CoreMusic is one of Core applications that written in java and javafx.
 
 | Dark                                       | Light                                      |
 |--------------------------------------------|--------------------------------------------|
-| ![](images/Screenshot_20220729_161231.png) | ![](images/Screenshot_20220729_161422.png) |
-| ![](images/Screenshot_20220729_161321.png) | ![](images/Screenshot_20220729_161433.png) |
+| ![](images/Screenshot_20220729_182801.png) | ![](images/Screenshot_20220729_182635.png) |
+| ![](images/Screenshot_20220729_182824.png) | ![](images/Screenshot_20220729_182853.png) |
 | ![](images/Screenshot_20220729_161336.png) | ![](images/Screenshot_20220729_161451.png) |
