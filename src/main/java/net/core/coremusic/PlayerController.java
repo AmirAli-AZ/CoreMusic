@@ -85,17 +85,18 @@ public class PlayerController implements Initializable {
             player.seek(Duration.ZERO);
             setPlaying(true);
             playSvgPath.setContent(Icons.PAUSE);
+
             return;
         }
 
         if (playingProperty.get()) {
             player.pause();
-            playSvgPath.setContent(Icons.PLAY);
             setPlaying(false);
+            playSvgPath.setContent(Icons.PLAY);
         }else {
             player.play();
-            playSvgPath.setContent(Icons.PAUSE);
             setPlaying(true);
+            playSvgPath.setContent(Icons.PAUSE);
         }
     }
 
@@ -108,7 +109,7 @@ public class PlayerController implements Initializable {
 
         if (size == 1) {
             player.seek(Duration.ZERO);
-            if (!playingProperty.get()) {
+            if (!isPlaying()) {
                 player.play();
                 setPlaying(true);
             }
@@ -136,12 +137,12 @@ public class PlayerController implements Initializable {
         if (listView.getItems().isEmpty())
             return;
 
+        setPlaying(false);
         var size = listView.getItems().size();
 
         if (size == 1) {
             player.seek(player.getMedia().getDuration());
             playSvgPath.setContent(Icons.PLAY);
-            setPlaying(false);
 
             return;
         }
@@ -149,7 +150,6 @@ public class PlayerController implements Initializable {
         var selectedIndex = listView.getSelectionModel().getSelectedIndex();
 
         player.stop();
-        setPlaying(false);
 
         if (selectedIndex < listView.getItems().size() - 1) {
             initPlayer(listView.getItems().get(selectedIndex + 1));
@@ -169,9 +169,9 @@ public class PlayerController implements Initializable {
     public void sliderReleased(MouseEvent event) {
         player.seek(Duration.seconds(slider.getValue()));
         if (!isPlaying()) {
-            playSvgPath.setContent(Icons.PAUSE);
-            setPlaying(true);
             player.play();
+            setPlaying(true);
+            playSvgPath.setContent(Icons.PAUSE);
         }
         setSliding(false);
     }
@@ -231,10 +231,10 @@ public class PlayerController implements Initializable {
         player.setOnReady(() -> {
             slider.setMax(media.getDuration().toSeconds());
             totalTimeLabel.setText(formatDuration(media.getDuration()));
-            player.play();
-            playSvgPath.setContent(Icons.PAUSE);
             player.setVolume(volumeSlider.getValue() * 0.01);
+            player.play();
             setPlaying(true);
+            playSvgPath.setContent(Icons.PAUSE);
         });
         player.setOnEndOfMedia(() -> {
             if (isRepeat()) {
