@@ -55,7 +55,7 @@ public final class App extends Application {
         if (configManager.getMusicDir().isEmpty()) {
             if (askMusicFolder())
                 openApp();
-        } else {
+        }else {
             openApp();
         }
     }
