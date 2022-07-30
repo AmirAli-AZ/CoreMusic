@@ -37,6 +37,8 @@ public final class FavouritesDBManager {
     }
 
     public void init() throws SQLException {
+        if (connection != null)
+            connection.close();
         connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
 
         var statement = connection.createStatement();
