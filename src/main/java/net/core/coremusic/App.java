@@ -80,7 +80,7 @@ public final class App extends Application {
         var pickBtn = new Button();
         var folderIcon = new SVGPath();
         var okBtn = new Button("OK");
-        var dialogExit = new AtomicBoolean(false);
+        var dialogExit = new AtomicBoolean();
         var musicDir = new AtomicReference<File>();
 
         stage.setResizable(false);
