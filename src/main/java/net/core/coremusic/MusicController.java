@@ -137,9 +137,6 @@ public class MusicController implements Initializable {
     }
 
     public void setPlayerVisible(boolean visible) {
-        if (borderPane == null)
-            return;
-
         if (playerController == null) {
             try {
                 var loader = new FXMLLoader(getClass().getResource("player-view.fxml"));

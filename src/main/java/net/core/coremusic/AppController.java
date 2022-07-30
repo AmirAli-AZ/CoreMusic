@@ -80,23 +80,24 @@ public class AppController implements Initializable {
 
                 musicController.setBorderPane(root);
             }
-            if (splitPane.getItems().size() == 1)
-                splitPane.getItems().add(musicRoot);
-            else
-                splitPane.getItems().set(splitPane.getItems().size() - 1, musicRoot);
-
-            if (!musicBtn.isSelected())
-                musicBtn.setSelected(true);
-
-            musicController.setSelected(true);
-            musicController.refresh();
-
-            if (favouriteListController != null) {
-                favouriteListController.stop();
-                favouriteListController.setSelected(false);
-            }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        if (splitPane.getItems().size() == 1)
+            splitPane.getItems().add(musicRoot);
+        else
+            splitPane.getItems().set(splitPane.getItems().size() - 1, musicRoot);
+
+        if (!musicBtn.isSelected())
+            musicBtn.setSelected(true);
+
+        musicController.setSelected(true);
+        musicController.refresh();
+
+        if (favouriteListController != null) {
+            favouriteListController.stop();
+            favouriteListController.setSelected(false);
         }
     }
 
@@ -109,20 +110,21 @@ public class AppController implements Initializable {
 
                 favouriteListController.setBorderPane(root);
             }
-            if (splitPane.getItems().size() == 1)
-                splitPane.getItems().add(favouriteListRoot);
-            else
-                splitPane.getItems().set(splitPane.getItems().size() - 1, favouriteListRoot);
-
-            favouriteListController.setSelected(true);
-            favouriteListController.refresh();
-
-            if (musicController != null) {
-                musicController.stop();
-                musicController.setSelected(false);
-            }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        if (splitPane.getItems().size() == 1)
+            splitPane.getItems().add(favouriteListRoot);
+        else
+            splitPane.getItems().set(splitPane.getItems().size() - 1, favouriteListRoot);
+
+        favouriteListController.setSelected(true);
+        favouriteListController.refresh();
+
+        if (musicController != null) {
+            musicController.stop();
+            musicController.setSelected(false);
         }
     }
 
@@ -146,9 +148,7 @@ public class AppController implements Initializable {
 
     @FXML
     public void openSettings(ActionEvent actionEvent) {
-        if (settingsStage == null)
-            return;
-        if (!settingsStage.isShowing())
+        if (settingsStage != null && !settingsStage.isShowing())
             settingsStage.show();
     }
 

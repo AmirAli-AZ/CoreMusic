@@ -169,14 +169,8 @@ public class FavouriteListController implements Initializable {
         });
     }
 
-    public void setBorderPane(@NotNull BorderPane borderPane) {
-        this.borderPane = borderPane;
-    }
 
     public void setPlayerVisible(boolean visible) {
-        if (borderPane == null)
-            return;
-
         if (playerController == null) {
             try {
                 var loader = new FXMLLoader(getClass().getResource("player-view.fxml"));
@@ -197,6 +191,10 @@ public class FavouriteListController implements Initializable {
         } else {
             stop();
         }
+    }
+
+    public void setBorderPane(@NotNull BorderPane borderPane) {
+        this.borderPane = borderPane;
     }
 
     public void stop() {

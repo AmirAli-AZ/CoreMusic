@@ -62,33 +62,25 @@ public class PlayerController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        slider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (media != null)
-                currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue())));
-        });
+        slider.valueProperty().addListener((observableValue, oldValue, newValue) -> currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue()))));
 
         volumeSlider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (player != null) {
-                var doubleValue = newValue.doubleValue();
+            var doubleValue = newValue.doubleValue();
 
-                player.setVolume(doubleValue * 0.01);
+            player.setVolume(doubleValue * 0.01);
 
-                if (doubleValue == 0)
-                    volumeSvgPath.setContent(Icons.VOLUME_OFF);
-                else if (doubleValue <= 50)
-                    volumeSvgPath.setContent(Icons.VOLUME_DOWN);
-                else
-                    volumeSvgPath.setContent(Icons.VOLUME_UP);
-            }
+            if (doubleValue == 0)
+                volumeSvgPath.setContent(Icons.VOLUME_OFF);
+            else if (doubleValue <= 50)
+                volumeSvgPath.setContent(Icons.VOLUME_DOWN);
+            else
+                volumeSvgPath.setContent(Icons.VOLUME_UP);
         });
     }
 
 
     @FXML
     public void play(ActionEvent event) {
-        if (player == null)
-            return;
-
         if (player.getCurrentTime().equals(player.getTotalDuration())) {
             player.seek(Duration.ZERO);
             setPlaying(true);
@@ -109,8 +101,6 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void rewind(ActionEvent event) {
-        if (listView == null || player == null)
-            return;
         if (listView.getItems().isEmpty())
             return;
 
@@ -143,8 +133,6 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void forward(ActionEvent event) {
-        if (listView == null || player == null)
-            return;
         if (listView.getItems().isEmpty())
             return;
 
@@ -174,17 +162,11 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void sliderPressed(MouseEvent event) {
-        if (player == null)
-            return;
-
         setSliding(true);
     }
 
     @FXML
     public void sliderReleased(MouseEvent event) {
-        if (player == null)
-            return;
-
         player.seek(Duration.seconds(slider.getValue()));
         if (!isPlaying()) {
             playSvgPath.setContent(Icons.PAUSE);
@@ -196,9 +178,6 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void addToFavourites() {
-        if (item == null)
-            return;
-
         try {
             favouriteDBManager.init();
         } catch (SQLException e) {
@@ -296,9 +275,6 @@ public class PlayerController implements Initializable {
     }
 
     public void stop() {
-        if (player == null)
-            return;
-
         if (isPlaying()) {
             player.stop();
             setPlaying(false);

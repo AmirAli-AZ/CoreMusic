@@ -195,8 +195,8 @@ public final class App extends Application {
             while (change.next()) {
                 if (change.wasAdded()) {
                     for (Window window : change.getAddedSubList()) {
-                        if (window instanceof Stage stage)
-                            stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/CoreMusicLogo64.png"))));
+                        if (window instanceof Stage addedStage)
+                            addedStage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/CoreMusicLogo64.png"))));
                     }
                 }
             }
