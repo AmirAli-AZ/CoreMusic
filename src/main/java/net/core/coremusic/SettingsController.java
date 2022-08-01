@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
 import java.util.ResourceBundle;
 
@@ -92,6 +93,7 @@ public class SettingsController implements Initializable {
         if (musicDirSettingsPage == null) {
             var title = new Label("Music Directory");
             title.setFont(Font.font(Font.getDefault().getName(), FontWeight.BOLD, 16));
+            var currentDirLabel = new Label("Current dir: " + configManager.getMusicDirPath().orElseGet(() -> Paths.get("")));
             var label = new Label("Change Music Directory");
             var changeButton = new Button("Change");
             changeButton.setDefaultButton(true);
@@ -114,6 +116,7 @@ public class SettingsController implements Initializable {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        currentDirLabel.setText("Current directory: " + path);
                     });
                 }
             });
@@ -123,6 +126,7 @@ public class SettingsController implements Initializable {
             musicDirSettingsPage = new VBox(
                     5,
                     title, new Separator(),
+                    currentDirLabel,
                     hbox
             );
             musicDirSettingsPage.setPadding(new Insets(5));
