@@ -1,6 +1,5 @@
 package net.core.coremusic;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -158,10 +157,10 @@ public class AppController implements Initializable {
         var loader = new FXMLLoader(getClass().getResource("settings-view.fxml"));
         var scene = new Scene(loader.load());
         AppConfigManager.getInstance().setTheme(AppConfigManager.getInstance().loadTheme(), scene);
+        stage.setScene(scene);
         SettingsController controller = loader.getController();
         controller.setMusicController(musicController);
-        stage.setScene(scene);
-        Platform.runLater(() -> stage.initOwner(root.getScene().getWindow()));
+        stage.initOwner(App.getInstance().getStage());
 
         return stage;
     }

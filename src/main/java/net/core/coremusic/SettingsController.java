@@ -93,7 +93,7 @@ public class SettingsController implements Initializable {
         if (musicDirSettingsPage == null) {
             var title = new Label("Music Directory");
             title.setFont(Font.font(Font.getDefault().getName(), FontWeight.BOLD, 16));
-            var currentDirLabel = new Label("Current dir: " + configManager.getMusicDirPath().orElseGet(() -> Paths.get("")));
+            var currentDirLabel = new Label("Current directory: " + configManager.getMusicDirPath().orElseGet(() -> Paths.get("")));
             var label = new Label("Change Music Directory");
             var changeButton = new Button("Change");
             changeButton.setDefaultButton(true);

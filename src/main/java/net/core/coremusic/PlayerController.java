@@ -5,17 +5,18 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Slider;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 import net.core.coremusic.model.Item;
+import net.core.coremusic.utils.AppConfigManager;
 import net.core.coremusic.utils.FavouritesDBManager;
 import net.core.coremusic.utils.Icons;
 import org.jetbrains.annotations.NotNull;
@@ -245,11 +246,8 @@ public class PlayerController implements Initializable {
         this.item = item;
 
         media = new Media(item.getPath().toUri().toString());
-        if (media.getError() != null) {
-            media.getError().printStackTrace();
-            return;
-        }
         player = new MediaPlayer(media);
+        player.setOnError(() -> showErrorDialog(player.getError()));
         player.setOnReady(() -> {
             slider.setMax(media.getDuration().toSeconds());
             totalTimeLabel.setText(formatDuration(media.getDuration()));
@@ -266,7 +264,6 @@ public class PlayerController implements Initializable {
                 playSvgPath.setContent(Icons.PLAY);
             }
         });
-
         player.currentTimeProperty().addListener((observableValue, duration, currentDuration) -> {
             if (!isSliding())
                 slider.setValue(currentDuration.toSeconds());
@@ -337,5 +334,14 @@ public class PlayerController implements Initializable {
 
     public void setRootController(@NotNull Object rootController) {
         this.rootController = rootController;
+    }
+
+    private void showErrorDialog(@NotNull Exception exception) {
+        var alert = new Alert(Alert.AlertType.ERROR, exception.getMessage(), ButtonType.OK);
+        alert.setTitle("Media error");
+        alert.setHeaderText("Media error");
+        alert.getDialogPane().getStylesheets().add(AppConfigManager.getInstance().loadTheme().getPath());
+        alert.initOwner(App.getInstance().getStage());
+        alert.show();
     }
 }

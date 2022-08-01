@@ -7,7 +7,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.media.Media;
-import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import net.core.coremusic.model.Item;
 
@@ -56,10 +55,6 @@ public class MusicCell extends ListCell<Item> {
             return;
 
         var media = new Media(item.getPath().toUri().toString());
-        if (media.getError() != null) {
-            media.getError().printStackTrace();
-            return;
-        }
         var player = new MediaPlayer(media);
 
         player.setOnReady(() -> {

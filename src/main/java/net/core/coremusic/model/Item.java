@@ -29,7 +29,7 @@ public class Item {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(@NotNull String title) {
         this.title = title;
     }
 
@@ -37,7 +37,7 @@ public class Item {
         return image;
     }
 
-    public void setImage(Image image) {
+    public void setImage(@NotNull Image image) {
         this.image = image;
     }
 }

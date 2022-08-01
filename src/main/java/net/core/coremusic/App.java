@@ -2,6 +2,7 @@ package net.core.coremusic;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -9,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
@@ -75,15 +77,12 @@ public final class App extends Application {
     }
 
     public boolean askMusicFolder() {
-        var stage = new Stage();
+        var dialog = new javafx.scene.control.Dialog<Boolean>();
         var pathLabel = new Label();
         var pickBtn = new Button();
         var folderIcon = new SVGPath();
-        var okBtn = new Button("OK");
-        var dialogExit = new AtomicBoolean();
-        var musicDir = new AtomicReference<File>();
+        var musicDir = new SimpleObjectProperty<File>();
 
-        stage.setResizable(false);
         HBox.setHgrow(pathLabel, Priority.ALWAYS);
         pathLabel.setMaxWidth(Double.MAX_VALUE);
         pickBtn.setPrefSize(30, 30);
@@ -95,44 +94,34 @@ public final class App extends Application {
         pickBtn.setOnAction(actionEvent -> {
             var directoryChooser = new DirectoryChooser();
             directoryChooser.setTitle("Choose music folder");
-            musicDir.set(directoryChooser.showDialog(stage));
-            if (musicDir.get() != null)
-                pathLabel.setText(musicDir.get().getAbsolutePath());
+            var dir = directoryChooser.showDialog(stage);
+            musicDir.set(dir);
+            if (dir != null)
+                pathLabel.setText(dir.getAbsolutePath());
         });
-        okBtn.setPrefSize(75, 25);
-        okBtn.setDefaultButton(true);
-        okBtn.setOnAction(actionEvent -> {
-            if (musicDir.get() != null) {
+
+        var root = new HBox(3, new Label("Music Directory: "), pathLabel, pickBtn);
+        root.setPrefSize(400, 150);
+        root.setAlignment(Pos.TOP_LEFT);
+        root.setPadding(new Insets(5));
+
+        dialog.getDialogPane().getStylesheets().add(configManager.loadTheme().getPath());
+        dialog.getDialogPane().setContent(root);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        dialog.setResultConverter(buttonType -> {
+            if (buttonType == ButtonType.OK && musicDir.get() != null && musicDir.get().exists()) {
                 try {
                     configManager.setMusicDir(musicDir.get());
-                    dialogExit.set(true);
+                    return true;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                stage.close();
             }
+
+            return false;
         });
 
-        var center = new HBox(3, new Label("Music Directory: "), pathLabel, pickBtn);
-        center.setAlignment(Pos.TOP_LEFT);
-        center.setPadding(new Insets(5));
-
-        var bottom = new HBox(okBtn);
-        bottom.setAlignment(Pos.CENTER_RIGHT);
-        bottom.setPadding(new Insets(5));
-
-        var root = new BorderPane();
-        root.setId("root");
-        root.setCenter(center);
-        root.setBottom(bottom);
-
-        var scene = new Scene(root, 400, 200);
-        configManager.setTheme(configManager.loadTheme(), scene);
-
-        stage.setScene(scene);
-        stage.showAndWait();
-
-        return dialogExit.get();
+        return dialog.showAndWait().get();
     }
 
     public void registerDirectories() throws IOException {
@@ -201,6 +190,11 @@ public final class App extends Application {
                 }
             }
         });
+    }
+
+
+    public Stage getStage() {
+        return stage;
     }
 
     public static void main(String[] args) {
