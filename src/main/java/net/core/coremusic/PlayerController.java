@@ -5,13 +5,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
-import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
@@ -64,7 +61,7 @@ public class PlayerController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         slider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (media != null && media.getError() == null)
+            if (media != null)
                 currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue())));
         });
 
@@ -221,6 +218,9 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void repeat(ActionEvent actionEvent) {
+        if (player == null)
+            return;
+
         if (isRepeat()) {
             setRepeat(false);
             repeatSvgPath.setContent(Icons.REPEAT_OFF);
@@ -342,6 +342,11 @@ public class PlayerController implements Initializable {
         alert.setHeaderText("Media error");
         alert.getDialogPane().getStylesheets().add(AppConfigManager.getInstance().loadTheme().getPath());
         alert.initOwner(App.getInstance().getStage());
-        alert.show();
+        alert.showAndWait();
+
+        if (rootController instanceof MusicController controller)
+            controller.stop();
+        else if (rootController instanceof  FavouriteListController controller)
+            controller.stop();
     }
 }
