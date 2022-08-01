@@ -62,25 +62,33 @@ public class PlayerController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        slider.valueProperty().addListener((observableValue, oldValue, newValue) -> currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue()))));
+        slider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (media != null && media.getError() == null)
+                currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue())));
+        });
 
         volumeSlider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-            var doubleValue = newValue.doubleValue();
+            if (player != null) {
+                var doubleValue = newValue.doubleValue();
 
-            player.setVolume(doubleValue * 0.01);
+                player.setVolume(doubleValue * 0.01);
 
-            if (doubleValue == 0)
-                volumeSvgPath.setContent(Icons.VOLUME_OFF);
-            else if (doubleValue <= 50)
-                volumeSvgPath.setContent(Icons.VOLUME_DOWN);
-            else
-                volumeSvgPath.setContent(Icons.VOLUME_UP);
+                if (doubleValue == 0)
+                    volumeSvgPath.setContent(Icons.VOLUME_OFF);
+                else if (doubleValue <= 50)
+                    volumeSvgPath.setContent(Icons.VOLUME_DOWN);
+                else
+                    volumeSvgPath.setContent(Icons.VOLUME_UP);
+            }
         });
     }
 
 
     @FXML
     public void play(ActionEvent event) {
+        if (player == null)
+            return;
+
         if (player.getCurrentTime().equals(player.getTotalDuration())) {
             player.seek(Duration.ZERO);
             setPlaying(true);
@@ -102,6 +110,8 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void rewind(ActionEvent event) {
+        if (player == null)
+            return;
         if (listView.getItems().isEmpty())
             return;
 
@@ -134,6 +144,8 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void forward(ActionEvent event) {
+        if (player == null)
+            return;
         if (listView.getItems().isEmpty())
             return;
 
@@ -162,11 +174,15 @@ public class PlayerController implements Initializable {
 
     @FXML
     public void sliderPressed(MouseEvent event) {
+        if (player == null)
+            return;
         setSliding(true);
     }
 
     @FXML
     public void sliderReleased(MouseEvent event) {
+        if (player == null)
+            return;
         player.seek(Duration.seconds(slider.getValue()));
         if (!isPlaying()) {
             player.play();
@@ -190,12 +206,14 @@ public class PlayerController implements Initializable {
             favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
             controller.setRefreshing(false);
         }else if (rootController instanceof MusicController) {
-            if (favouriteDBManager.isAdded(item)) {
-                favouriteDBManager.removeFromFavourites(item);
-                favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
-            } else {
-                favouriteDBManager.addToFavourites(item.title(), item.path());
-                favouriteSvgPath.setContent(Icons.FAVOURITE);
+            if (item.getTitle() != null) {
+                if (favouriteDBManager.isAdded(item)) {
+                    favouriteDBManager.removeFromFavourites(item);
+                    favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
+                } else {
+                    favouriteDBManager.addToFavourites(item.getTitle(), item.getPath());
+                    favouriteSvgPath.setContent(Icons.FAVOURITE);
+                }
             }
         }
     }
@@ -226,7 +244,11 @@ public class PlayerController implements Initializable {
     public void initPlayer(@NotNull Item item) {
         this.item = item;
 
-        media = new Media(item.path().toUri().toString());
+        media = new Media(item.getPath().toUri().toString());
+        if (media.getError() != null) {
+            media.getError().printStackTrace();
+            return;
+        }
         player = new MediaPlayer(media);
         player.setOnReady(() -> {
             slider.setMax(media.getDuration().toSeconds());
@@ -275,10 +297,13 @@ public class PlayerController implements Initializable {
     }
 
     public void stop() {
+        if (player == null)
+            return;
         if (isPlaying()) {
             player.stop();
             setPlaying(false);
         }
+        player.dispose();
         slider.setValue(0);
     }
 

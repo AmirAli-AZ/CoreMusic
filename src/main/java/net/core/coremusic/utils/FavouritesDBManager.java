@@ -70,7 +70,7 @@ public final class FavouritesDBManager {
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("delete from favourites where path == ?;");
-            preparedStatement.setObject(1, item.path());
+            preparedStatement.setObject(1, item.getPath());
 
             preparedStatement.execute();
             preparedStatement.close();
@@ -99,8 +99,8 @@ public final class FavouritesDBManager {
             return false;
 
         try {
-            var preparedStatement = connection.prepareStatement("select * from favourites where title == ?;");
-            preparedStatement.setString(1, item.title());
+            var preparedStatement = connection.prepareStatement("select * from favourites where path == ?;");
+            preparedStatement.setObject(1, item.getPath());
 
             var result = preparedStatement.executeQuery();
             var resultHasNext = result.next();

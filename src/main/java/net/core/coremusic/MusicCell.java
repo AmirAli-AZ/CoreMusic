@@ -1,51 +1,78 @@
 package net.core.coremusic;
 
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
+import javafx.scene.media.MediaPlayer;
 import net.core.coremusic.model.Item;
 
-import java.io.IOException;
+import java.io.File;
+import java.nio.file.Files;
+import java.util.Objects;
 
 public class MusicCell extends ListCell<Item> {
 
-    @FXML
+
     private HBox root;
 
-    @FXML
-    private ImageView imageview;
+    private final ImageView imageview = new ImageView();
 
-    @FXML
-    private Label title;
+    private final Label title = new Label();
 
-    private FXMLLoader loader;
 
     @Override
     protected void updateItem(Item item, boolean b) {
         super.updateItem(item, b);
 
+        setText(null);
         if (item == null || b) {
             setGraphic(null);
         }else {
-            if (loader == null) {
-                loader = new FXMLLoader(getClass().getResource("music-cell-view.fxml"));
-                loader.setController(this);
-                try {
-                    loader.load();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            if (root == null)
+                createView();
 
-            imageview.setImage(item.image());
-            title.setText(item.title());
-
+            setContent(item);
             setGraphic(root);
         }
+    }
 
-        setText(null);
+    private void createView() {
+        imageview.setFitWidth(50);
+        imageview.setFitHeight(50);
+
+        HBox.setMargin(title, new Insets(5, 0, 0, 0));
+
+        root = new HBox(5, imageview, title);
+        root.setStyle("-fx-background-color: transparent;");
+    }
+
+    private void setContent(Item item) {
+        if (Files.notExists(item.getPath()))
+            return;
+
+        var media = new Media(item.getPath().toUri().toString());
+        if (media.getError() != null) {
+            media.getError().printStackTrace();
+            return;
+        }
+        var player = new MediaPlayer(media);
+
+        player.setOnReady(() -> {
+            var image = Objects.requireNonNullElseGet(((Image) media.getMetadata().get("image")), () -> new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/CoreMusicLogo64.png"))));
+            var musicTitle = Objects.requireNonNullElseGet(((String) media.getMetadata().get("title")), () -> new File(media.getSource()).getName());
+
+            item.setImage(image);
+            item.setTitle(musicTitle);
+
+            imageview.setImage(image);
+            title.setText(musicTitle);
+
+            player.dispose();
+        });
     }
 }

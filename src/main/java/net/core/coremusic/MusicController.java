@@ -3,17 +3,13 @@ package net.core.coremusic;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import net.core.coremusic.model.Item;
 import net.core.coremusic.utils.AppConfigManager;
 import net.core.coremusic.utils.DirectoryWatcher;
@@ -50,6 +46,9 @@ public class MusicController implements Initializable {
 
     private VBox playerRoot;
 
+    private final AppConfigManager configManager = AppConfigManager.getInstance();
+
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         listview.setCellFactory(musicCellListView -> {
@@ -67,10 +66,15 @@ public class MusicController implements Initializable {
     }
 
     public void refresh() {
-        if (isRefreshing() || !isSelected())
+        var thread = new Thread(this::loadMusics);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private synchronized void loadMusics() {
+        if (!isSelected())
             return;
 
-        var configManager = AppConfigManager.getInstance();
         var musicDir = configManager.getMusicDir();
 
         if (musicDir.isEmpty())
@@ -80,60 +84,24 @@ public class MusicController implements Initializable {
 
         setRefreshing(true);
         Platform.runLater(() -> listview.getItems().clear());
+        for (File file : Objects.requireNonNull(musicDir.get().listFiles())) {
+            if (!file.exists())
+                continue;
 
-        var task = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                var object = new Object();
+            if (checkExtension(file, ".mp3") || checkExtension(file, ".wav"))
+                Platform.runLater(() -> listview.getItems().add(new Item(file.toPath())));
+        }
+        setRefreshing(false);
+    }
 
-                for (File file : Objects.requireNonNull(musicDir.get().listFiles())) {
-                    if (checkExtension(file, ".mp3") || checkExtension(file, ".wav")) {
-                        var media = new Media(file.toURI().toString());
-                        var mediaPlayer = new MediaPlayer(media);
-
-                        mediaPlayer.setOnReady(() -> {
-                            var image = Objects.requireNonNullElseGet(((Image) media.getMetadata().get("image")), () -> new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/CoreMusicLogo64.png"))));
-                            var musicTitle = Objects.requireNonNullElseGet(((String) media.getMetadata().get("title")), () -> new File(media.getSource()).getName());
-
-                            Platform.runLater(() -> listview.getItems().add(new Item(musicTitle, image, file.toPath())));
-
-                            synchronized (object) {
-                                object.notify();
-                            }
-                        });
-
-                        synchronized (object) {
-                            object.wait();
-                        }
-                    }
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void succeeded() {
-                setRefreshing(false);
-            }
-
-            @Override
-            protected void failed() {
-                setRefreshing(false);
-            }
-
-            private boolean checkExtension(File file, String extension) {
-                if (file.isDirectory())
-                    return false;
-                var filename = file.getName();
-                var lastIndex = filename.lastIndexOf('.');
-                if (lastIndex == -1)
-                    return false;
-                return filename.substring(lastIndex).equalsIgnoreCase(extension);
-            }
-        };
-        var thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
+    private boolean checkExtension(File file, String extension) {
+        if (file.isDirectory())
+            return false;
+        var filename = file.getName();
+        var lastIndex = filename.lastIndexOf('.');
+        if (lastIndex == -1)
+            return false;
+        return filename.substring(lastIndex).equalsIgnoreCase(extension);
     }
 
     public void setPlayerVisible(boolean visible) {
@@ -154,7 +122,7 @@ public class MusicController implements Initializable {
                 playerController.initPlayer(listview.getSelectionModel().getSelectedItem());
                 borderPane.setBottom(playerRoot);
             }
-        }else {
+        } else {
             stop();
         }
     }
@@ -174,7 +142,6 @@ public class MusicController implements Initializable {
 
     private void watchDirs() {
         var watcher = DirectoryWatcher.getInstance();
-        var configManager = AppConfigManager.getInstance();
         var musicDirPath = configManager.getMusicDirPath();
 
         watcher.addListener((event, eventDir) -> {

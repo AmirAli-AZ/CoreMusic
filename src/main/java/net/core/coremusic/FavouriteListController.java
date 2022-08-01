@@ -3,7 +3,6 @@ package net.core.coremusic;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -47,7 +46,7 @@ public class FavouriteListController implements Initializable {
             if (b)
                 Platform.runLater(() -> stop());
         }
-    },selectedProperty = new SimpleBooleanProperty();
+    }, selectedProperty = new SimpleBooleanProperty();
 
     private final FavouritesDBManager favouritesDBManager = FavouritesDBManager.getInstance();
 
@@ -56,6 +55,7 @@ public class FavouriteListController implements Initializable {
     private PlayerController playerController;
 
     private VBox playerRoot;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -70,77 +70,44 @@ public class FavouriteListController implements Initializable {
             return favouriteCell;
         });
 
-        refresh();
+        //refresh();
         watchDirs();
     }
 
     public void refresh() {
-        if (isRefreshing() || !isSelected())
-            return;
-
-        try {
-            favouritesDBManager.init();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        setRefreshing(true);
-        Platform.runLater(() -> listview.getItems().clear());
-
-        var task = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                var object = new Object();
-
-                var statement = favouritesDBManager.getConnection().createStatement();
-
-                var result = statement.executeQuery("select * from favourites;");
-
-                while (result.next()) {
-                    var path = Paths.get(result.getString("path"));
-                    if (Files.notExists(path)) {
-                        favouritesDBManager.removeFromFavourites(path);
-                        continue;
-                    }
-
-                    var title = result.getString("title");
-
-                    var media = new Media(path.toUri().toString());
-                    var player = new MediaPlayer(media);
-
-                    player.setOnReady(() -> {
-                        var image = Objects.requireNonNullElseGet(((Image) media.getMetadata().get("image")), () -> new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/CoreMusicLogo64.png"))));
-                        var item = new Item(title, image, path);
-
-                        Platform.runLater(() -> listview.getItems().add(item));
-
-                        synchronized (object) {
-                            object.notify();
-                        }
-                    });
-
-                    synchronized (object) {
-                        object.wait();
-                    }
-                }
-
-                return null;
+        var thread = new Thread(() -> {
+            try {
+                loadFavouriteMusics();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-
-            @Override
-            protected void succeeded() {
-                setRefreshing(false);
-            }
-
-            @Override
-            protected void failed() {
-                setRefreshing(false);
-            }
-        };
-
-        var thread = new Thread(task);
+        });
         thread.setDaemon(true);
         thread.start();
+    }
+
+    public synchronized void loadFavouriteMusics() throws SQLException {
+        if (!isSelected())
+            return;
+
+        setRefreshing(true);
+        favouritesDBManager.init();
+        Platform.runLater(() -> listview.getItems().clear());
+
+        var statement = favouritesDBManager.getConnection().createStatement();
+        var result = statement.executeQuery("select * from favourites;");
+
+        while (result.next()) {
+            var path = Paths.get(result.getString("path"));
+            if (Files.notExists(path)) {
+                favouritesDBManager.removeFromFavourites(path);
+                continue;
+            }
+
+            Platform.runLater(() -> listview.getItems().add(new Item(path)));
+        }
+
+        setRefreshing(false);
     }
 
     private void watchDirs() {
