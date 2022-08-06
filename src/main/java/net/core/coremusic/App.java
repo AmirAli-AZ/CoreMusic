@@ -13,7 +13,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.shape.SVGPath;
@@ -30,8 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.StandardWatchEventKinds;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public final class App extends Application {
 
@@ -165,7 +162,9 @@ public final class App extends Application {
         });
         var openItem = new MenuItem("Open CoreMusic");
         openItem.addActionListener(e -> Platform.runLater(() -> {
-            if (!stage.isShowing())
+            if (stage.isShowing())
+                stage.requestFocus();
+            else
                 stage.show();
         }));
         popupMenu.add(openItem);
