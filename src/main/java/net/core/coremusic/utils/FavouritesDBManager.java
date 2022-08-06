@@ -18,7 +18,7 @@ public final class FavouritesDBManager {
 
     private Connection connection;
 
-    private final Path dbPath = Paths.get(Environment.getAppDataPath() + File.separator + "Favourites.db");
+    private final Path dbPath = Paths.get(Environment.getAppData() + File.separator + "Favourites.db");
 
     private FavouritesDBManager() throws SQLException {
         init();

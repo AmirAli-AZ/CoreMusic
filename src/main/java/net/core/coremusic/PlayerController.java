@@ -61,23 +61,24 @@ public class PlayerController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         slider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (media != null)
-                currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue())));
+            if (media == null)
+                return;
+            currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue())));
         });
 
         volumeSlider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (player != null) {
-                var doubleValue = newValue.doubleValue();
+            if (player == null)
+                return;
+            var doubleValue = newValue.doubleValue();
 
-                player.setVolume(doubleValue * 0.01);
+            player.setVolume(doubleValue * 0.01);
 
-                if (doubleValue == 0)
-                    volumeSvgPath.setContent(Icons.VOLUME_OFF);
-                else if (doubleValue <= 50)
-                    volumeSvgPath.setContent(Icons.VOLUME_DOWN);
-                else
-                    volumeSvgPath.setContent(Icons.VOLUME_UP);
-            }
+            if (doubleValue == 0)
+                volumeSvgPath.setContent(Icons.VOLUME_OFF);
+            else if (doubleValue <= 50)
+                volumeSvgPath.setContent(Icons.VOLUME_DOWN);
+            else
+                volumeSvgPath.setContent(Icons.VOLUME_UP);
         });
     }
 

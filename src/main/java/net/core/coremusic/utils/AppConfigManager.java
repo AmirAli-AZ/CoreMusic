@@ -19,7 +19,7 @@ public final class AppConfigManager {
 
     private static AppConfigManager instance;
 
-    private final Path configPath = Paths.get(Environment.getAppDataPath() + File.separator + "config.properties");
+    private final Path configPath = Paths.get(Environment.getAppData() + File.separator + "config.properties");
 
     private final Properties properties = new Properties();
 
@@ -88,26 +88,26 @@ public final class AppConfigManager {
         outputStream.close();
     }
 
-    public void setMusicDir(@NotNull File file) throws IOException {
-        properties.setProperty("music_dir", file.getAbsolutePath());
+    public void setMusicDir(@NotNull Path path) throws IOException {
+        Files.createDirectories(path);
+        properties.setProperty("music_dir", path.toString());
         var outputStream = new FileOutputStream(configPath.toFile());
         properties.store(outputStream, "DO NOT EDIT");
         outputStream.close();
     }
 
-    public void setMusicDir(@NotNull Path path) throws IOException {
-        setMusicDir(path.toFile());
-    }
-
-    public Optional<File> getMusicDir() {
+    public Optional<Path> getMusicDir() {
         var musicDir = properties.getProperty("music_dir");
-        if (musicDir != null)
-            return Optional.of(new File(musicDir));
+        if (musicDir != null) {
+            var path = Paths.get(musicDir);
+            try {
+                Files.createDirectories(path);
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+            return Optional.of(path);
+        }
         return Optional.empty();
-    }
-
-    public Optional<Path> getMusicDirPath() {
-        return getMusicDir().map(File::toPath);
     }
 
     public Path getConfigPath() {

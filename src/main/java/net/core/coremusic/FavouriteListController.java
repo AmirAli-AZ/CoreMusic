@@ -7,12 +7,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import net.core.coremusic.model.Item;
 import net.core.coremusic.utils.AppConfigManager;
 import net.core.coremusic.utils.DirectoryWatcher;
@@ -27,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class FavouriteListController implements Initializable {
@@ -112,9 +108,9 @@ public class FavouriteListController implements Initializable {
 
     private void watchDirs() {
         var watcher = DirectoryWatcher.getInstance();
-        var appDataPath = Environment.getAppDataPath();
+        var appDataPath = Environment.getAppData();
         var configManager = AppConfigManager.getInstance();
-        var musicDirPath = configManager.getMusicDirPath();
+        var musicDirPath = configManager.getMusicDir();
 
         watcher.addListener((event, eventDir) -> {
             try {

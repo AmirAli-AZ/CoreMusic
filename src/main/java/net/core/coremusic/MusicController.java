@@ -79,12 +79,12 @@ public class MusicController implements Initializable {
 
         if (musicDir.isEmpty())
             return;
-        if (!musicDir.get().exists())
+        if (Files.notExists(musicDir.get()))
             return;
 
         setRefreshing(true);
         Platform.runLater(() -> listview.getItems().clear());
-        for (File file : Objects.requireNonNull(musicDir.get().listFiles())) {
+        for (File file : Objects.requireNonNull(musicDir.get().toFile().listFiles())) {
             if (!file.exists())
                 continue;
 
@@ -142,7 +142,7 @@ public class MusicController implements Initializable {
 
     private void watchDirs() {
         var watcher = DirectoryWatcher.getInstance();
-        var musicDirPath = configManager.getMusicDirPath();
+        var musicDirPath = configManager.getMusicDir();
 
         watcher.addListener((event, eventDir) -> {
             try {

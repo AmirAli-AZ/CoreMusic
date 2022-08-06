@@ -93,32 +93,33 @@ public class SettingsController implements Initializable {
         if (musicDirSettingsPage == null) {
             var title = new Label("Music Directory");
             title.setFont(Font.font(Font.getDefault().getName(), FontWeight.BOLD, 16));
-            var currentDirLabel = new Label("Current directory: " + configManager.getMusicDirPath().orElseGet(() -> Paths.get("")));
+            var currentDirLabel = new Label("Current directory: " + configManager.getMusicDir().orElseGet(() -> Paths.get("")));
             var label = new Label("Change Music Directory");
             var changeButton = new Button("Change");
             changeButton.setDefaultButton(true);
             changeButton.setPrefSize(75,25);
             changeButton.setOnAction(actionEvent -> {
-                if (musicController != null && App.getInstance().askMusicFolder()) {
-                    musicController.refresh();
+                if (musicController == null)
+                    return;
+                var musicDir = App.getInstance().askMusicFolder();
+                if (musicDir == null)
+                    return;
 
-                    var watcher = DirectoryWatcher.getInstance();
-                    var musicDirPath = configManager.getMusicDirPath();
+                musicController.refresh();
 
-                    musicDirPath.ifPresent(path -> {
-                        try {
-                            watcher.register(
-                                    path,
-                                    StandardWatchEventKinds.ENTRY_CREATE,
-                                    StandardWatchEventKinds.ENTRY_MODIFY,
-                                    StandardWatchEventKinds.ENTRY_DELETE
-                            );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        currentDirLabel.setText("Current directory: " + path);
-                    });
+                var watcher = DirectoryWatcher.getInstance();
+
+                try {
+                    watcher.register(
+                            musicDir,
+                            StandardWatchEventKinds.ENTRY_CREATE,
+                            StandardWatchEventKinds.ENTRY_MODIFY,
+                            StandardWatchEventKinds.ENTRY_DELETE
+                    );
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+                currentDirLabel.setText("Current directory: " + musicDir);
             });
             var hbox = new HBox(5, label, changeButton);
             hbox.setAlignment(Pos.CENTER_LEFT);

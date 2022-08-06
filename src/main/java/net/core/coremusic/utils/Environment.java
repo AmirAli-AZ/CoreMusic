@@ -21,7 +21,7 @@ public final class Environment {
         Environment.path = Paths.get(path);
     }
 
-    public static File getAppData() {
+    public static Path getAppData() {
         try {
             var dir = Files.createDirectories(path);
             if (OS.isWindows())
@@ -30,11 +30,7 @@ public final class Environment {
             e.printStackTrace();
         }
 
-        return path.toFile();
-    }
-
-    public static Path getAppDataPath() {
-        return getAppData().toPath();
+        return path;
     }
 
     private static void setHideAttribute(@NotNull Path path) throws IOException {

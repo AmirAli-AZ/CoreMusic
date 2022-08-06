@@ -25,8 +25,8 @@ import net.core.coremusic.utils.Environment;
 import net.core.coremusic.utils.Icons;
 
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.util.Objects;
 
@@ -52,7 +52,8 @@ public final class App extends Application {
 
         syncWindowIcons();
         if (configManager.getMusicDir().isEmpty()) {
-            if (askMusicFolder())
+            var musicDir = askMusicFolder();
+            if (musicDir != null)
                 openApp();
         }else {
             openApp();
@@ -73,12 +74,12 @@ public final class App extends Application {
             stage.setOnCloseRequest(windowEvent -> DirectoryWatcher.getInstance().interrupt());
     }
 
-    public boolean askMusicFolder() {
-        var dialog = new javafx.scene.control.Dialog<Boolean>();
+    public Path askMusicFolder() {
+        var dialog = new javafx.scene.control.Dialog<Path>();
         var pathLabel = new Label();
         var pickBtn = new Button();
         var folderIcon = new SVGPath();
-        var musicDir = new SimpleObjectProperty<File>();
+        var musicDir = new SimpleObjectProperty<Path>();
 
         HBox.setHgrow(pathLabel, Priority.ALWAYS);
         pathLabel.setMaxWidth(Double.MAX_VALUE);
@@ -92,9 +93,10 @@ public final class App extends Application {
             var directoryChooser = new DirectoryChooser();
             directoryChooser.setTitle("Choose music folder");
             var dir = directoryChooser.showDialog(stage);
-            musicDir.set(dir);
-            if (dir != null)
+            if (dir != null) {
+                musicDir.set(dir.toPath());
                 pathLabel.setText(dir.getAbsolutePath());
+            }
         });
 
         var root = new HBox(3, new Label("Music Directory: "), pathLabel, pickBtn);
@@ -106,26 +108,26 @@ public final class App extends Application {
         dialog.getDialogPane().setContent(root);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
         dialog.setResultConverter(buttonType -> {
-            if (buttonType == ButtonType.OK && musicDir.get() != null && musicDir.get().exists()) {
+            if (buttonType == ButtonType.OK && musicDir.get() != null) {
                 try {
                     configManager.setMusicDir(musicDir.get());
-                    return true;
+                    return musicDir.get();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
 
-            return false;
+            return null;
         });
 
-        return dialog.showAndWait().get();
+        return dialog.showAndWait().orElse(null);
     }
 
     public void registerDirectories() throws IOException {
         var watcher = DirectoryWatcher.getInstance();
 
-        var musicDirPath = configManager.getMusicDirPath();
-        var appDataPath = Environment.getAppDataPath();
+        var musicDirPath = configManager.getMusicDir();
+        var appDataPath = Environment.getAppData();
 
         musicDirPath.ifPresent(path -> {
             try {
