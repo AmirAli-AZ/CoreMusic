@@ -14,10 +14,10 @@ public final class Environment {
     private static Path path;
 
     static {
-        var path = System.getProperty("user.home") + File.separator + ".net.core.coremusic";
+        var path = System.getProperty("user.home") + File.separator + ".net.core" + File.separator + "coremusic";
 
         if (OS.isWindows())
-            path = System.getenv("APPDATA") + File.separator + ".net.core.coremusic";
+            path = System.getenv("APPDATA") + File.separator + ".net.core"  + File.separator + "coremusic";
         Environment.path = Paths.get(path);
     }
 
@@ -25,7 +25,7 @@ public final class Environment {
         try {
             var dir = Files.createDirectories(path);
             if (OS.isWindows())
-                setHideAttribute(dir);
+                hide(dir.getParent());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -33,7 +33,7 @@ public final class Environment {
         return path;
     }
 
-    private static void setHideAttribute(@NotNull Path path) throws IOException {
+    private static void hide(@NotNull Path path) throws IOException {
         var dosFileAttributeView = Files.getFileAttributeView(path, DosFileAttributeView.class);
         var dosFileAttributes = dosFileAttributeView.readAttributes();
 
