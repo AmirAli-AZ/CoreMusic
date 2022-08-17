@@ -87,9 +87,6 @@ public class MusicController implements Initializable {
         setRefreshing(true);
         Platform.runLater(() -> listview.getItems().clear());
         for (File file : Objects.requireNonNull(musicDir.get().toFile().listFiles())) {
-            if (!file.exists())
-                continue;
-
             if (isPlayable(file))
                 Platform.runLater(() -> listview.getItems().add(new Item(file.toPath())));
         }
@@ -97,7 +94,7 @@ public class MusicController implements Initializable {
     }
 
     private boolean isPlayable(File file) {
-        if (file.isDirectory())
+        if (!file.exists() || file.isDirectory())
             return false;
 
         try {
