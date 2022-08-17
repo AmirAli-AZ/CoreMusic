@@ -20,8 +20,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.ResourceBundle;
 
 public class PlayerController implements Initializable {
@@ -282,12 +280,10 @@ public class PlayerController implements Initializable {
     }
 
     private String formatDuration(@NotNull Duration duration, @NotNull Duration currentDuration) {
-        var pattern = "mm:ss";
-
-        if (duration.toMinutes() >= 60)
-            pattern = "hh:mm:ss";
-
-        return new SimpleDateFormat(pattern).format(new Date(((long) currentDuration.toMillis())));
+        var millis = ((long) currentDuration.toMillis());
+        if (duration.toHours() >= 1)
+            return String.format("%02d:%02d:%02d", (millis / 3_600_000) % 24, (millis /  60_000) % 60, (millis / 1_000) % 60);
+        return String.format("%02d:%02d", (millis /  60_000) % 60, (millis / 1_000) % 60);
     }
 
     private String formatDuration(@NotNull Duration duration) {
