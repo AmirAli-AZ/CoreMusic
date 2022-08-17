@@ -10,6 +10,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
 import net.core.coremusic.model.Item;
 import net.core.coremusic.utils.AppConfigManager;
 import net.core.coremusic.utils.DirectoryWatcher;
@@ -88,20 +90,22 @@ public class MusicController implements Initializable {
             if (!file.exists())
                 continue;
 
-            if (checkExtension(file, ".mp3") || checkExtension(file, ".wav"))
+            if (isPlayable(file))
                 Platform.runLater(() -> listview.getItems().add(new Item(file.toPath())));
         }
         setRefreshing(false);
     }
 
-    private boolean checkExtension(File file, String extension) {
+    private boolean isPlayable(File file) {
         if (file.isDirectory())
             return false;
-        var filename = file.getName();
-        var lastIndex = filename.lastIndexOf('.');
-        if (lastIndex == -1)
+
+        try {
+            new Media(file.toURI().toString());
+            return true;
+        }catch (MediaException e) {
             return false;
-        return filename.substring(lastIndex).equalsIgnoreCase(extension);
+        }
     }
 
     public void setPlayerVisible(boolean visible) {
