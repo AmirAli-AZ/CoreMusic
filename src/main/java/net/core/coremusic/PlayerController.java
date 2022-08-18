@@ -280,10 +280,18 @@ public class PlayerController implements Initializable {
     }
 
     private String formatDuration(@NotNull Duration duration, @NotNull Duration currentDuration) {
-        var millis = ((long) currentDuration.toMillis());
         if (duration.toHours() >= 1)
-            return String.format("%02d:%02d:%02d", (millis / 3_600_000) % 24, (millis /  60_000) % 60, (millis / 1_000) % 60);
-        return String.format("%02d:%02d", (millis /  60_000) % 60, (millis / 1_000) % 60);
+            return String.format(
+                    "%02d:%02d:%02d",
+                    ((long) (currentDuration.toHours() % 24)),
+                    ((long) (currentDuration.toMinutes() % 60)),
+                    ((long) (currentDuration.toSeconds() % 60))
+            );
+        return String.format(
+                "%02d:%02d",
+                ((long) (currentDuration.toMinutes() % 60)),
+                ((long) (currentDuration.toSeconds() % 60))
+        );
     }
 
     private String formatDuration(@NotNull Duration duration) {
