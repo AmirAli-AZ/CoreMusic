@@ -42,22 +42,10 @@ public class PlayerController implements Initializable {
 
     private MediaPlayer player;
 
-    private Media media;
-
     private final BooleanProperty
             playingProperty = new SimpleBooleanProperty(),
             slidingProperty = new SimpleBooleanProperty(),
-            repeatProperty = new SimpleBooleanProperty() {
-                @Override
-                public void set(boolean b) {
-                    super.set(b);
-
-                    if (b)
-                        repeatSvgPath.setContent(Icons.REPEAT_ON);
-                    else
-                        repeatSvgPath.setContent(Icons.REPEAT_OFF);
-                }
-            },
+            repeatProperty = new SimpleBooleanProperty(),
             randomPlayerProperty = new SimpleBooleanProperty();
 
     private ListView<Item> listView;
@@ -76,9 +64,9 @@ public class PlayerController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         slider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (media == null)
+            if (player == null)
                 return;
-            currentTimeLabel.setText(formatDuration(media.getDuration(), Duration.seconds(newValue.doubleValue())));
+            currentTimeLabel.setText(formatDuration(player.getMedia().getDuration(), Duration.seconds(newValue.doubleValue())));
         });
 
         volumeSlider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
@@ -124,7 +112,7 @@ public class PlayerController implements Initializable {
             return;
         }
 
-        if (playingProperty.get()) {
+        if (isPlaying()) {
             player.pause();
             setPlaying(false);
             playSvgPath.setContent(Icons.PLAY);
@@ -277,11 +265,10 @@ public class PlayerController implements Initializable {
     public void initPlayer(@NotNull Item item) {
         this.item = item;
 
-        media = new Media(item.getPath().toUri().toString());
-        player = new MediaPlayer(media);
+        player = new MediaPlayer(new Media(item.getPath().toUri().toString()));
         player.setOnReady(() -> {
-            slider.setMax(media.getDuration().toSeconds());
-            totalTimeLabel.setText(formatDuration(media.getDuration()));
+            slider.setMax(player.getMedia().getDuration().toSeconds());
+            totalTimeLabel.setText(formatDuration(player.getMedia().getDuration()));
             player.setVolume(volumeSlider.getValue() * 0.01);
             player.play();
             setPlaying(true);
