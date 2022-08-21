@@ -83,6 +83,11 @@ public class AppController implements Initializable {
             e.printStackTrace();
         }
 
+        if (favouriteListController != null) {
+            favouriteListController.stop();
+            favouriteListController.setSelected(false);
+        }
+
         if (splitPane.getItems().size() == 1)
             splitPane.getItems().add(musicRoot);
         else
@@ -92,12 +97,8 @@ public class AppController implements Initializable {
             musicBtn.setSelected(true);
 
         musicController.setSelected(true);
-        musicController.refresh();
-
-        if (favouriteListController != null) {
-            favouriteListController.stop();
-            favouriteListController.setSelected(false);
-        }
+        if (!musicController.isRefreshing())
+            musicController.refresh();
     }
 
     private void loadFavourites() {
@@ -113,18 +114,19 @@ public class AppController implements Initializable {
             e.printStackTrace();
         }
 
+        if (musicController != null) {
+            musicController.stop();
+            musicController.setSelected(false);
+        }
+
         if (splitPane.getItems().size() == 1)
             splitPane.getItems().add(favouriteListRoot);
         else
             splitPane.getItems().set(splitPane.getItems().size() - 1, favouriteListRoot);
 
         favouriteListController.setSelected(true);
-        favouriteListController.refresh();
-
-        if (musicController != null) {
-            musicController.stop();
-            musicController.setSelected(false);
-        }
+        if (!favouriteListController.isRefreshing())
+            favouriteListController.refresh();
     }
 
     private void loadEmptyPage() {

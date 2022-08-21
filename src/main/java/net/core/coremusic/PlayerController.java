@@ -5,7 +5,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -13,7 +15,6 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 import net.core.coremusic.model.Item;
-import net.core.coremusic.utils.AppConfigManager;
 import net.core.coremusic.utils.FavouritesDBManager;
 import net.core.coremusic.utils.Icons;
 import org.jetbrains.annotations.NotNull;
@@ -28,10 +29,10 @@ public class PlayerController implements Initializable {
     private VBox root;
 
     @FXML
-    private Button rewindBtn, playBtn, forwardBtn, favouriteBtn, repeatBtn, volumeBtn;
+    private Button repeatBtn;
 
     @FXML
-    private SVGPath rewindSvgPath, playSvgPath, forwardSvgPath, favouriteSvgPath, repeatSvgPath, volumeSvgPath;
+    private SVGPath playSvgPath, favouriteSvgPath, repeatSvgPath, volumeSvgPath;
 
     @FXML
     private Label currentTimeLabel, totalTimeLabel;
@@ -46,7 +47,18 @@ public class PlayerController implements Initializable {
     private final BooleanProperty
             playingProperty = new SimpleBooleanProperty(),
             slidingProperty = new SimpleBooleanProperty(),
-            repeatProperty = new SimpleBooleanProperty();
+            repeatProperty = new SimpleBooleanProperty() {
+                @Override
+                public void set(boolean b) {
+                    super.set(b);
+
+                    if (b)
+                        repeatSvgPath.setContent(Icons.REPEAT_ON);
+                    else
+                        repeatSvgPath.setContent(Icons.REPEAT_OFF);
+                }
+            },
+            randomPlayerProperty = new SimpleBooleanProperty();
 
     private ListView<Item> listView;
 
@@ -55,6 +67,11 @@ public class PlayerController implements Initializable {
     private Item item;
 
     private Object rootController;
+
+    private ContextMenu contextMenu;
+
+    private final CheckMenuItem randomPlayerCheckMenuItem = new CheckMenuItem("Random player");
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -77,6 +94,19 @@ public class PlayerController implements Initializable {
                 volumeSvgPath.setContent(Icons.VOLUME_DOWN);
             else
                 volumeSvgPath.setContent(Icons.VOLUME_UP);
+        });
+
+        contextMenu = createContextMenu();
+
+        randomPlayerProperty.addListener((observableValue, oldValue, newValue) -> {
+            if (newValue) {
+                setRepeat(false);
+                repeatSvgPath.setContent(Icons.REPEAT_OFF);
+                repeatBtn.setDisable(true);
+            }else {
+                if (repeatBtn.isDisabled())
+                    repeatBtn.setDisable(false);
+            }
         });
     }
 
@@ -151,7 +181,8 @@ public class PlayerController implements Initializable {
 
         if (size == 1) {
             player.seek(player.getMedia().getDuration());
-            playSvgPath.setContent(Icons.PLAY);
+            if (!isRepeat())
+                playSvgPath.setContent(Icons.PLAY);
 
             return;
         }
@@ -220,13 +251,7 @@ public class PlayerController implements Initializable {
         if (player == null)
             return;
 
-        if (isRepeat()) {
-            setRepeat(false);
-            repeatSvgPath.setContent(Icons.REPEAT_OFF);
-        }else {
-            setRepeat(true);
-            repeatSvgPath.setContent(Icons.REPEAT_ON);
-        }
+        setRepeat(!isRepeat());
     }
 
     @FXML
@@ -241,12 +266,19 @@ public class PlayerController implements Initializable {
             volumeSlider.setValue(volumeSlider.getMin());
     }
 
+    @FXML
+    public void more(MouseEvent mouseEvent) {
+        if (mouseEvent.getButton() != MouseButton.PRIMARY && !contextMenu.isShowing())
+            return;
+
+        contextMenu.show((Node) mouseEvent.getSource(), mouseEvent.getScreenX(), mouseEvent.getScreenY());
+    }
+
     public void initPlayer(@NotNull Item item) {
         this.item = item;
 
         media = new Media(item.getPath().toUri().toString());
         player = new MediaPlayer(media);
-        player.setOnError(() -> showErrorDialog(player.getError()));
         player.setOnReady(() -> {
             slider.setMax(media.getDuration().toSeconds());
             totalTimeLabel.setText(formatDuration(media.getDuration()));
@@ -256,7 +288,9 @@ public class PlayerController implements Initializable {
             playSvgPath.setContent(Icons.PAUSE);
         });
         player.setOnEndOfMedia(() -> {
-            if (isRepeat()) {
+            if (isRandomPlayer()) {
+                playRandom();
+            }else if (isRepeat()) {
                 player.seek(Duration.ZERO);
             }else {
                 setPlaying(false);
@@ -277,6 +311,13 @@ public class PlayerController implements Initializable {
             favouriteSvgPath.setContent(Icons.FAVOURITE);
         else
             favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
+
+        if (listView.getItems().size() < 2) {
+            randomPlayerCheckMenuItem.setSelected(false);
+            randomPlayerCheckMenuItem.setDisable(true);
+        } else {
+            randomPlayerCheckMenuItem.setDisable(false);
+        }
     }
 
     private String formatDuration(@NotNull Duration duration, @NotNull Duration currentDuration) {
@@ -333,6 +374,10 @@ public class PlayerController implements Initializable {
         return repeatProperty.get();
     }
 
+    public boolean isRandomPlayer() {
+        return randomPlayerProperty.get();
+    }
+
     public void setListview(@NotNull ListView<Item> listview) {
         this.listView = listview;
     }
@@ -341,17 +386,20 @@ public class PlayerController implements Initializable {
         this.rootController = rootController;
     }
 
-    private void showErrorDialog(@NotNull Exception exception) {
-        var alert = new Alert(Alert.AlertType.ERROR, exception.getMessage(), ButtonType.OK);
-        alert.setTitle("Media error");
-        alert.setHeaderText("Media error");
-        alert.getDialogPane().getStylesheets().add(AppConfigManager.getInstance().loadTheme().getPath());
-        alert.initOwner(App.getInstance().getStage());
-        alert.showAndWait();
+    private ContextMenu createContextMenu() {
+        randomPlayerProperty.bind(randomPlayerCheckMenuItem.selectedProperty());
 
-        if (rootController instanceof MusicController controller)
-            controller.stop();
-        else if (rootController instanceof  FavouriteListController controller)
-            controller.stop();
+        return new ContextMenu(randomPlayerCheckMenuItem);
+    }
+
+    public void playRandom() {
+        var size = listView.getItems().size();
+        if (listView.getItems().isEmpty() || size < 2)
+            return;
+
+        var randomIndex = (int) Math.floor(Math.random() * size);
+
+        initPlayer(listView.getItems().get(randomIndex));
+        listView.getSelectionModel().select(randomIndex);
     }
 }

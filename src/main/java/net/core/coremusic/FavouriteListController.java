@@ -10,6 +10,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
 import net.core.coremusic.model.Item;
 import net.core.coremusic.utils.AppConfigManager;
 import net.core.coremusic.utils.DirectoryWatcher;
@@ -17,6 +19,7 @@ import net.core.coremusic.utils.Environment;
 import net.core.coremusic.utils.FavouritesDBManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -66,7 +69,7 @@ public class FavouriteListController implements Initializable {
             return favouriteCell;
         });
 
-        //refresh();
+        refresh();
         watchDirs();
     }
 
@@ -95,7 +98,7 @@ public class FavouriteListController implements Initializable {
 
         while (result.next()) {
             var path = Paths.get(result.getString("path"));
-            if (Files.notExists(path)) {
+            if (!isPlayable(path.toFile())) {
                 favouritesDBManager.removeFromFavourites(path);
                 continue;
             }
@@ -104,6 +107,18 @@ public class FavouriteListController implements Initializable {
         }
 
         setRefreshing(false);
+    }
+
+    private boolean isPlayable(File file) {
+        if (!file.exists() || file.isDirectory())
+            return false;
+
+        try {
+            new Media(file.toURI().toString());
+            return true;
+        }catch (MediaException e) {
+            return false;
+        }
     }
 
     private void watchDirs() {
