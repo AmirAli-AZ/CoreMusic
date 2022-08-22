@@ -151,3 +151,8 @@ SVGPath {
     -fx-background-color: -fx-almost-black;
     -fx-background-radius: 5px;
 }
+
+.dialog-pane,
+.dialog-pane:header .header-panel {
+    -fx-background-color: -fx-bg-color;
+}

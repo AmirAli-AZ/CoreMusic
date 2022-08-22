@@ -162,9 +162,10 @@ public class MusicController implements Initializable {
 
     private void watchDirs() {
         var watcher = DirectoryWatcher.getInstance();
-        var musicDirPath = configManager.getMusicDir();
 
         watcher.addListener((event, eventDir) -> {
+            var musicDirPath = configManager.getMusicDir();
+
             try {
                 if (musicDirPath.isPresent() && Files.isSameFile(musicDirPath.get(), eventDir))
                     refresh();

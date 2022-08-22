@@ -144,9 +144,10 @@ public class FavouriteListController implements Initializable {
         var watcher = DirectoryWatcher.getInstance();
         var appDataPath = Environment.getAppData();
         var configManager = AppConfigManager.getInstance();
-        var musicDirPath = configManager.getMusicDir();
 
         watcher.addListener((event, eventDir) -> {
+            var musicDirPath = configManager.getMusicDir();
+
             try {
                 if (Files.isSameFile(eventDir, appDataPath)) {
                     var context = ((Path) event.context());
