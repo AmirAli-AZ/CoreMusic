@@ -164,11 +164,3 @@ SVGPath {
     -fx-background-color: lightgray;
     -fx-background-radius: 5px;
 }
-
-.dialog-pane {
-    -fx-background-color: white;
-}
-
-.dialog-pane:header .header-panel {
-    -fx-background-color: white;
-}

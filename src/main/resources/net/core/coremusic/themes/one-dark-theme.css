@@ -1,9 +1,11 @@
 * {
-    -fx-accent: #D10130;
+    -fx-bg-color: #282C34;
+    -fx-accent: #4D78DD;
+    -fx-almost-black: #21252B;
 }
 
 #root {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
 }
 
 .item {
@@ -14,7 +16,7 @@
     -fx-alignment: center;
     -fx-background-color: transparent;
     -fx-background-radius: 0px;
-    -fx-text-fill: black;
+    -fx-text-fill: white;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
@@ -22,16 +24,14 @@
 .item:hover {
     -fx-background-color: -fx-accent;
     -fx-cursor: hand;
-    -fx-text-fill: white;
 }
 
 .item:selected {
     -fx-background-color: -fx-accent;
-    -fx-text-fill: white;
 }
 
 .split-pane .split-pane-divider {
-    -fx-background-color: lightgray;
+    -fx-background-color: -fx-almost-black;
 }
 
 .list-view {
@@ -49,17 +49,16 @@
     -fx-background-color: -fx-accent;
 }
 
-.list-cell:filled:selected:focused .label,
-.list-cell:filled:selected .label {
+.label {
     -fx-text-fill: white;
 }
 
 SVGPath {
-    -fx-fill: black;
+    -fx-fill: white;
 }
 
 .slider .track {
-    -fx-background-color: lightgray;
+    -fx-background-color: -fx-almost-black;
 }
 
 .slider .thumb {
@@ -67,17 +66,17 @@ SVGPath {
 }
 
 .context-menu {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
     -fx-background-radius: 5px;
     -fx-padding: 5px;
 }
 
 .menu-bar {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
 }
 
 .menu-item {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
     -fx-background-radius: 5px;
     -fx-cursor: hand;
 }
@@ -86,14 +85,10 @@ SVGPath {
     -fx-background-color: -fx-accent;
 }
 
-.menu-item:focused .label {
-    -fx-text-fill: white;
-}
-
 .combo-box {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
     -fx-background-radius: 5px;
-    -fx-border-color: lightgray;
+    -fx-border-color: -fx-almost-black;
     -fx-border-width: 2px;
     -fx-border-radius: 5px;
 }
@@ -104,16 +99,16 @@ SVGPath {
 }
 
 .combo-box-popup .list-view {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
     -fx-effect: dropshadow(three-pass-box, black, 5, 0, 0, 0);
 }
 
 .combo-box-popup .list-view .list-cell {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
     -fx-background-radius: 0px;
-    -fx-text-fill: black;
+    -fx-text-fill: white;
     -fx-padding: 5px;
     -fx-cursor: hand;
 }
@@ -121,12 +116,10 @@ SVGPath {
 .combo-box-popup .list-view .list-cell:filled:selected,
 .combo-box-popup .list-view .list-cell:filled:selected:focused {
     -fx-background-color: -fx-accent;
-    -fx-text-fill: white;
 }
 
 .combo-box-popup .list-view .list-cell:filled:hover {
     -fx-background-color: -fx-accent;
-    -fx-text-fill: white;
 }
 
 .combo-box .arrow-button {
@@ -134,27 +127,27 @@ SVGPath {
 }
 
 .combo-box .arrow-button .arrow {
-    -fx-background-color: black;
+    -fx-background-color: white;
 }
 
 .separator *.line {
     -fx-border-style: solid;
-    -fx-border-color: lightgray;
+    -fx-border-color: -fx-almost-black;
     -fx-border-width: 1px;
 }
 
 .scroll-pane .viewport {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
 }
 
 .scroll-bar .track-background,
 .scroll-bar .track,
 .scroll-bar .increment-button,
 .scroll-bar .decrement-button {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
 }
 
 .scroll-bar .thumb {
-    -fx-background-color: lightgray;
+    -fx-background-color: -fx-almost-black;
     -fx-background-radius: 5px;
 }
