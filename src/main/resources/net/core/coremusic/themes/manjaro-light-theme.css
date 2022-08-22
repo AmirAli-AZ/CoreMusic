@@ -167,5 +167,5 @@ SVGPath {
 
 .dialog-pane,
 .dialog-pane:header .header-panel {
-    -fx-background-color: -fx-bg-color;
+    -fx-background-color: white;
 }
