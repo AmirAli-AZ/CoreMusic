@@ -50,6 +50,10 @@ public class MusicController implements Initializable {
 
     private final AppConfigManager configManager = AppConfigManager.getInstance();
 
+    private Thread thread;
+
+    private volatile boolean stop;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -68,7 +72,17 @@ public class MusicController implements Initializable {
     }
 
     public void refresh() {
-        var thread = new Thread(this::loadMusics);
+        if (thread != null && isRefreshing()) {
+            stop = true;
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            stop = false;
+        }
+
+        thread = new Thread(this::loadMusics);
         thread.setDaemon(true);
         thread.start();
     }
@@ -87,6 +101,11 @@ public class MusicController implements Initializable {
         setRefreshing(true);
         Platform.runLater(() -> listview.getItems().clear());
         for (File file : Objects.requireNonNull(musicDir.get().toFile().listFiles())) {
+            if (stop) {
+                Platform.runLater(() -> listview.getItems().clear());
+                break;
+            }
+
             if (isPlayable(file))
                 Platform.runLater(() -> listview.getItems().add(new Item(file.toPath())));
         }

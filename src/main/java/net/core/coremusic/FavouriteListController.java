@@ -55,6 +55,10 @@ public class FavouriteListController implements Initializable {
 
     private VBox playerRoot;
 
+    private Thread thread;
+
+    private volatile boolean stop;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -74,7 +78,17 @@ public class FavouriteListController implements Initializable {
     }
 
     public void refresh() {
-        var thread = new Thread(() -> {
+        if (thread != null && isRefreshing()) {
+            stop = true;
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            stop = false;
+        }
+
+        thread = new Thread(() -> {
             try {
                 loadFavouriteMusics();
             } catch (SQLException e) {
@@ -97,6 +111,11 @@ public class FavouriteListController implements Initializable {
         var result = statement.executeQuery("select * from favourites;");
 
         while (result.next()) {
+            if (stop)  {
+                Platform.runLater(() -> listview.getItems().clear());
+                break;
+            }
+
             var path = Paths.get(result.getString("path"));
             if (!isPlayable(path.toFile())) {
                 favouritesDBManager.removeFromFavourites(path);
