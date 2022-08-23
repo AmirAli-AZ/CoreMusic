@@ -82,6 +82,7 @@ public final class AppConfigManager {
     }
 
     private void saveTheme(@NotNull Themes theme) throws IOException {
+        Environment.getAppData(); // to create app data dir when not exits
         properties.setProperty("theme", theme.getName());
         var outputStream = new FileOutputStream(configPath.toFile());
         properties.store(outputStream, "DO NOT EDIT");
@@ -89,6 +90,7 @@ public final class AppConfigManager {
     }
 
     public void setMusicDir(@NotNull Path path) throws IOException {
+        Environment.getAppData(); // to create app data dir when not exits
         Files.createDirectories(path);
         properties.setProperty("music_dir", path.toString());
         var outputStream = new FileOutputStream(configPath.toFile());

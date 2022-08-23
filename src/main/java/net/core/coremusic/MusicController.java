@@ -15,7 +15,6 @@ import javafx.scene.media.MediaException;
 import net.core.coremusic.model.Item;
 import net.core.coremusic.utils.AppConfigManager;
 import net.core.coremusic.utils.DirectoryWatcher;
-import net.core.coremusic.utils.Environment;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
