@@ -14,11 +14,10 @@ public final class Environment {
     private static Path path;
 
     static {
-        var path = System.getProperty("user.home") + File.separator + ".net.core" + File.separator + "coremusic";
+        path = Paths.get(System.getProperty("user.home") + File.separator + ".net.core" + File.separator + "coremusic");
 
         if (OS.isWindows())
-            path = System.getenv("APPDATA") + File.separator + ".net.core"  + File.separator + "coremusic";
-        Environment.path = Paths.get(path);
+            path = Paths.get(System.getenv("APPDATA") + File.separator + ".net.core"  + File.separator + "coremusic");
     }
 
     public static Path getAppData() {

@@ -86,4 +86,17 @@ public final class DirectoryWatcher implements Runnable {
     public void register(@NotNull Path path, WatchEvent.Kind<?>... events) throws IOException {
         keyMap.put(path.register(service, events), path);
     }
+
+    public void unregister(@NotNull Path path) {
+        if (!keyMap.containsValue(path))
+            return;
+
+        for (WatchKey key : keyMap.keySet()) {
+            if (keyMap.get(key).equals(path)) {
+                key.cancel();
+                keyMap.remove(key);
+                break;
+            }
+        }
+    }
 }

@@ -101,6 +101,7 @@ public class SettingsController implements Initializable {
             changeButton.setOnAction(actionEvent -> {
                 if (musicController == null)
                     return;
+                var oldMusicDir = AppConfigManager.getInstance().getMusicDir();
                 var musicDir = App.getInstance().askMusicFolder();
                 if (musicDir == null)
                     return;
@@ -108,7 +109,7 @@ public class SettingsController implements Initializable {
                 musicController.refresh();
 
                 var watcher = DirectoryWatcher.getInstance();
-
+                oldMusicDir.ifPresent(watcher::unregister);
                 try {
                     watcher.register(
                             musicDir,

@@ -149,16 +149,22 @@ public class FavouriteListController implements Initializable {
             var musicDirPath = configManager.getMusicDir();
 
             try {
-                if (Files.isSameFile(eventDir, appDataPath)) {
+                if (Files.exists(appDataPath) && Files.exists(eventDir) && Files.isSameFile(eventDir, appDataPath)) {
                     var context = ((Path) event.context());
 
-                    if (context.toString().equals(favouritesDBManager.getDbPath().getFileName().toString())) {
-                        if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY)
+                    if (context.equals(favouritesDBManager.getDbPath().getFileName())) {
+                        if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
                             refresh();
-                        else if (event.kind() == StandardWatchEventKinds.ENTRY_DELETE)
-                            Platform.runLater(() -> listview.getItems().clear());
+                        }else if (event.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
+                            Platform.runLater(() -> {
+                                stop();
+                                listview.getItems().clear();
+                            });
+                        }
                     }
-                } else if (musicDirPath.isPresent() && Files.isSameFile(eventDir, musicDirPath.get())) {
+                }
+
+                if (musicDirPath.isPresent() && Files.exists(musicDirPath.get()) && Files.exists(eventDir) && Files.isSameFile(eventDir, musicDirPath.get())) {
                     refresh();
                 }
             } catch (IOException e) {

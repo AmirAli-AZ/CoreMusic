@@ -39,6 +39,7 @@ public final class FavouritesDBManager {
     public void init() throws SQLException {
         if (connection != null)
             connection.close();
+        Environment.getAppData(); // to create app data dir when not exits
         connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
 
         var statement = connection.createStatement();
@@ -49,8 +50,6 @@ public final class FavouritesDBManager {
     public void addToFavourites(@NotNull String title, @NotNull Path path) {
         if (Files.notExists(dbPath))
             return;
-
-        Item addedFavouriteItem = null;
 
         try {
             var preparedStatement = connection.prepareStatement("insert or ignore into favourites values (?, ?);");

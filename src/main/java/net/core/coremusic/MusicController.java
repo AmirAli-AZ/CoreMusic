@@ -15,6 +15,7 @@ import javafx.scene.media.MediaException;
 import net.core.coremusic.model.Item;
 import net.core.coremusic.utils.AppConfigManager;
 import net.core.coremusic.utils.DirectoryWatcher;
+import net.core.coremusic.utils.Environment;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -167,7 +168,7 @@ public class MusicController implements Initializable {
             var musicDirPath = configManager.getMusicDir();
 
             try {
-                if (musicDirPath.isPresent() && Files.isSameFile(musicDirPath.get(), eventDir))
+                if (musicDirPath.isPresent() && Files.exists(musicDirPath.get()) && Files.exists(eventDir) && Files.isSameFile(musicDirPath.get(), eventDir))
                     refresh();
             } catch (IOException e) {
                 e.printStackTrace();
