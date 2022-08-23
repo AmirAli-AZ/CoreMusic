@@ -164,9 +164,8 @@ public class FavouriteListController implements Initializable {
                     }
                 }
 
-                if (musicDirPath.isPresent() && Files.exists(musicDirPath.get()) && Files.exists(eventDir) && Files.isSameFile(eventDir, musicDirPath.get())) {
+                if (musicDirPath.isPresent() && Files.exists(musicDirPath.get()) && Files.exists(eventDir) && Files.isSameFile(eventDir, musicDirPath.get()))
                     refresh();
-                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
