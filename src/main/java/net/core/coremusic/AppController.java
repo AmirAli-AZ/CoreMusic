@@ -141,10 +141,15 @@ public class AppController implements Initializable {
         else
             splitPane.getItems().set(splitPane.getItems().size() - 1, emptyPage);
 
-        if (musicController != null)
+        if (musicController != null) {
+            musicController.stop();
             musicController.setSelected(false);
-        if (favouriteListController != null)
+        }
+
+        if (favouriteListController != null) {
+            favouriteListController.stop();
             favouriteListController.setSelected(false);
+        }
     }
 
     @FXML
