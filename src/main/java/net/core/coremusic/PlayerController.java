@@ -265,7 +265,8 @@ public class PlayerController implements Initializable {
     public void initPlayer(@NotNull Item item) {
         this.item = item;
 
-        player = new MediaPlayer(new Media(item.getPath().toUri().toString()));
+        var media = new Media(item.getPath().toUri().toString());
+        player = new MediaPlayer(media);
         player.setOnReady(() -> {
             slider.setMax(player.getMedia().getDuration().toSeconds());
             totalTimeLabel.setText(formatDuration(player.getMedia().getDuration()));
