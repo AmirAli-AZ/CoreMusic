@@ -52,6 +52,8 @@ public class AppController implements Initializable {
         musicBtn.setToggleGroup(toggleGroup);
         favouritesBtn.setToggleGroup(toggleGroup);
 
+        toggleGroup.selectToggle(musicBtn);
+
         toggleGroup.selectedToggleProperty().addListener((observableValue, previousToggle, currentToggle) -> {
             if (currentToggle != null) {
                 if (currentToggle == musicBtn)
@@ -93,12 +95,8 @@ public class AppController implements Initializable {
         else
             splitPane.getItems().set(splitPane.getItems().size() - 1, musicRoot);
 
-        if (!musicBtn.isSelected())
-            musicBtn.setSelected(true);
-
         musicController.setSelected(true);
-        if (!musicController.isRefreshing())
-            musicController.refresh();
+        musicController.refresh();
     }
 
     private void loadFavourites() {
@@ -125,8 +123,7 @@ public class AppController implements Initializable {
             splitPane.getItems().set(splitPane.getItems().size() - 1, favouriteListRoot);
 
         favouriteListController.setSelected(true);
-        if (!favouriteListController.isRefreshing())
-            favouriteListController.refresh();
+        favouriteListController.refresh();
     }
 
     private void loadEmptyPage() {
@@ -135,11 +132,6 @@ public class AppController implements Initializable {
             message.setFont(Font.font(Font.getDefault().getName(), FontWeight.BOLD, 16));
             emptyPage = new StackPane(message);
         }
-
-        if (splitPane.getItems().size() == 1)
-            splitPane.getItems().add(emptyPage);
-        else
-            splitPane.getItems().set(splitPane.getItems().size() - 1, emptyPage);
 
         if (musicController != null) {
             musicController.stop();
@@ -150,6 +142,11 @@ public class AppController implements Initializable {
             favouriteListController.stop();
             favouriteListController.setSelected(false);
         }
+
+        if (splitPane.getItems().size() == 1)
+            splitPane.getItems().add(emptyPage);
+        else
+            splitPane.getItems().set(splitPane.getItems().size() - 1, emptyPage);
     }
 
     @FXML

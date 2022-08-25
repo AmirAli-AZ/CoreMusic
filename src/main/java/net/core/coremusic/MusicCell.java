@@ -19,9 +19,9 @@ public class MusicCell extends ListCell<Item> {
 
     private HBox root;
 
-    private final ImageView imageview = new ImageView();
+    private ImageView imageview;
 
-    private final Label title = new Label();
+    private Label title;
 
 
     @Override
@@ -41,9 +41,11 @@ public class MusicCell extends ListCell<Item> {
     }
 
     private void createView() {
+        imageview = new ImageView();
         imageview.setFitWidth(50);
         imageview.setFitHeight(50);
 
+        title = new Label();
         HBox.setMargin(title, new Insets(5, 0, 0, 0));
 
         root = new HBox(5, imageview, title);
