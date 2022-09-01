@@ -222,11 +222,13 @@ public class PlayerController implements Initializable {
             favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
             controller.setRefreshing(false);
         }else if (rootController instanceof MusicController) {
-            if (item.getTitle() != null) {
-                if (favouriteDBManager.isAdded(item)) {
+            if (favouriteDBManager.isAdded(item)) {
+                if (item.getPath() != null) {
                     favouriteDBManager.removeFromFavourites(item);
                     favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
-                } else {
+                }
+            } else {
+                if (item.getPath() != null && item.getTitle() != null) {
                     favouriteDBManager.addToFavourites(item.getTitle(), item.getPath());
                     favouriteSvgPath.setContent(Icons.FAVOURITE);
                 }
