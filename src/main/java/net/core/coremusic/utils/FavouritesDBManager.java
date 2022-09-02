@@ -47,14 +47,14 @@ public final class FavouritesDBManager {
         statement.close();
     }
 
-    public void addToFavourites(@NotNull String title, @NotNull Path path) {
+    public void addToFavourites(@NotNull Item item) {
         if (Files.notExists(dbPath))
             return;
 
         try {
             var preparedStatement = connection.prepareStatement("insert or ignore into favourites values (?, ?);");
-            preparedStatement.setString(1, title);
-            preparedStatement.setObject(2, path);
+            preparedStatement.setString(1, item.getTitle());
+            preparedStatement.setObject(2, item.getPath());
 
             preparedStatement.execute();
             preparedStatement.close();

@@ -227,7 +227,7 @@ public class PlayerController implements Initializable {
                 favouriteSvgPath.setContent(Icons.FAVOURITE_BORDER);
             } else {
                 if (item.getTitle() != null) {
-                    favouriteDBManager.addToFavourites(item.getTitle(), item.getPath());
+                    favouriteDBManager.addToFavourites(item);
                     favouriteSvgPath.setContent(Icons.FAVOURITE);
                 }
             }
