@@ -64,18 +64,7 @@ public final class FavouritesDBManager {
     }
 
     public void removeFromFavourites(@NotNull Item item) {
-        if (Files.notExists(dbPath))
-            return;
-
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement("delete from favourites where path == ?;");
-            preparedStatement.setObject(1, item.getPath());
-
-            preparedStatement.execute();
-            preparedStatement.close();
-        }catch (SQLException e) {
-            e.printStackTrace();
-        }
+        removeFromFavourites(item.getPath());
     }
 
     public void removeFromFavourites(@NotNull Path path) {
