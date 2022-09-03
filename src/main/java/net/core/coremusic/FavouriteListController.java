@@ -73,7 +73,6 @@ public class FavouriteListController implements Initializable {
             return favouriteCell;
         });
 
-        refresh();
         watchDirs();
     }
 

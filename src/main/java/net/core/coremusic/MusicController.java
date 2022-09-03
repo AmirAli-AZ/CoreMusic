@@ -67,7 +67,6 @@ public class MusicController implements Initializable {
             return musicCell;
         });
 
-        refresh();
         watchDirs();
     }
 

@@ -9,9 +9,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import net.core.coremusic.model.Item;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public class FavouriteCell extends ListCell<Item> {
@@ -60,7 +61,7 @@ public class FavouriteCell extends ListCell<Item> {
 
         player.setOnReady(() -> {
             var image = Objects.requireNonNullElseGet(((Image) media.getMetadata().get("image")), () -> new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/CoreMusicLogo64.png"))));
-            var musicTitle = Objects.requireNonNullElseGet(((String) media.getMetadata().get("title")), () -> new File(media.getSource()).getName());
+            var musicTitle = Objects.requireNonNullElseGet(((String) media.getMetadata().get("title")), () -> getFileName(item.getPath()));
 
             item.setImage(image);
             item.setTitle(musicTitle);
@@ -70,5 +71,15 @@ public class FavouriteCell extends ListCell<Item> {
 
             player.dispose();
         });
+    }
+
+    private String getFileName(@NotNull Path path) {
+        var name = path.getFileName().toString();
+        var lastIndex = name.lastIndexOf('.');
+
+        if (lastIndex == -1)
+            return "";
+
+        return name.substring(0, lastIndex);
     }
 }
