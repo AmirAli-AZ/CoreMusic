@@ -114,10 +114,7 @@ SVGPath {
 }
 
 .combo-box-popup .list-view .list-cell:filled:selected,
-.combo-box-popup .list-view .list-cell:filled:selected:focused {
-    -fx-background-color: -fx-accent;
-}
-
+.combo-box-popup .list-view .list-cell:filled:selected:focused,
 .combo-box-popup .list-view .list-cell:filled:hover {
     -fx-background-color: -fx-accent;
 }

@@ -1,9 +1,10 @@
 * {
+    -fx-bg-color: white;
     -fx-accent: #55A649;
 }
 
 #root {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
 }
 
 .item {
@@ -67,13 +68,13 @@ SVGPath {
 }
 
 .context-menu {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
     -fx-background-radius: 5px;
     -fx-padding: 5px;
 }
 
 .menu-bar {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
 }
 
 .menu:hover > .label,
@@ -83,7 +84,7 @@ SVGPath {
 }
 
 .menu-item {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
     -fx-background-radius: 5px;
     -fx-cursor: hand;
 }
@@ -97,7 +98,7 @@ SVGPath {
 }
 
 .combo-box {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
     -fx-background-radius: 5px;
     -fx-border-color: lightgray;
     -fx-border-width: 2px;
@@ -110,14 +111,14 @@ SVGPath {
 }
 
 .combo-box-popup .list-view {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
     -fx-effect: dropshadow(three-pass-box, black, 5, 0, 0, 0);
 }
 
 .combo-box-popup .list-view .list-cell {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
     -fx-background-radius: 0px;
     -fx-text-fill: black;
     -fx-padding: 5px;
@@ -125,11 +126,7 @@ SVGPath {
 }
 
 .combo-box-popup .list-view .list-cell:filled:selected,
-.combo-box-popup .list-view .list-cell:filled:selected:focused {
-    -fx-background-color: -fx-accent;
-    -fx-text-fill: white;
-}
-
+.combo-box-popup .list-view .list-cell:filled:selected:focused,
 .combo-box-popup .list-view .list-cell:filled:hover {
     -fx-background-color: -fx-accent;
     -fx-text-fill: white;
@@ -150,14 +147,14 @@ SVGPath {
 }
 
 .scroll-pane .viewport {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
 }
 
 .scroll-bar .track-background,
 .scroll-bar .track,
 .scroll-bar .increment-button,
 .scroll-bar .decrement-button {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
 }
 
 .scroll-bar .thumb {
@@ -167,5 +164,5 @@ SVGPath {
 
 .dialog-pane,
 .dialog-pane:header .header-panel {
-    -fx-background-color: white;
+    -fx-background-color: -fx-bg-color;
 }
