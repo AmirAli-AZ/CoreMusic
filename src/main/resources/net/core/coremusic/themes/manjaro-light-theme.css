@@ -146,15 +146,23 @@ SVGPath {
     -fx-border-width: 1px;
 }
 
-.scroll-pane .viewport {
+.scroll-pane,
+.scroll-pane > .viewport,
+.scroll-pane .corner {
     -fx-background-color: -fx-bg-color;
 }
 
+.scroll-bar,
 .scroll-bar .track-background,
 .scroll-bar .track,
 .scroll-bar .increment-button,
 .scroll-bar .decrement-button {
     -fx-background-color: -fx-bg-color;
+}
+
+.scroll-bar .increment-button .increment-arrow,
+.scroll-bar .decrement-button .decrement-arrow {
+    -fx-background-color: black;
 }
 
 .scroll-bar .thumb {
